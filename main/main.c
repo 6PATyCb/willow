@@ -159,16 +159,19 @@ err_nvs:
         }
         free(command_endpoint);
     }
-    init_buttons();
-    init_input_key_service();
+    // init_buttons();
+    // init_input_key_service();
+  //  ESP_LOGW(TAG, "before init_audio!!!");
     init_audio();
+  //  ESP_LOGW(TAG, "before init_lvgl_touch!!!");
     init_lvgl_touch();
+ //   ESP_LOGW(TAG, "before init_display_timer!!!");
     init_display_timer();
 
 #ifndef CONFIG_WILLOW_ETHERNET
     get_mac_address(); // should be on wifi by now; print the MAC
 #endif
-
+  //  ESP_LOGW(TAG, "before esp_app_get_description!!!");
     const esp_app_desc_t *app_desc = esp_app_get_description();
     ESP_LOGI(TAG, "Startup complete! Hardware: %s. Version: %s. Waiting for wake word.", str_hw_type(hw_type),
              app_desc->version);
@@ -176,30 +179,40 @@ err_nvs:
     // if we reached this point, we can mark the current partition valid
     // we can still crash on wake or other events but we should be able to do another OTA
     // we can also still crash in the while loop below - this should be improved
+  //  ESP_LOGW(TAG, "before esp_ota_mark_app_valid_cancel_rollback!!!");
     ESP_ERROR_CHECK_WITHOUT_ABORT(esp_ota_mark_app_valid_cancel_rollback());
-
+   // ESP_LOGW(TAG, "before reset_timer config_get_int!!!");
     ESP_ERROR_CHECK_WITHOUT_ABORT(
         reset_timer(hdl_display_timer, config_get_int("display_timeout", DEFAULT_DISPLAY_TIMEOUT), false));
 
 #ifdef CONFIG_WILLOW_DEBUG_RUNTIME_STATS
+    ESP_LOGW(TAG, "before xTaskCreate!!!");
     xTaskCreate(&task_debug_runtime_stats, "dbg_runtime_stats", 4 * 1024, NULL, 0, NULL);
 #endif
 
     while (true) {
+     //   ESP_LOGW(TAG, "begin loop!!!");
 #ifdef CONFIG_WILLOW_DEBUG_MEM
         printf("MALLOC_CAP_INTERNAL:\n");
+        ESP_LOGW(TAG, "before heap_caps_print_heap_info!!!");
         heap_caps_print_heap_info(MALLOC_CAP_INTERNAL);
         printf("MALLOC_CAP_SPIRAM:\n");
+        ESP_LOGW(TAG, "before heap_caps_print_heap_info!!!");
         heap_caps_print_heap_info(MALLOC_CAP_SPIRAM);
 #endif
 #ifdef CONFIG_WILLOW_DEBUG_TASKS
         char buf[128];
+        ESP_LOGW(TAG, "before vTaskList!!!");
         vTaskList(buf);
         printf("%s\n", buf);
 #endif
 #ifdef CONFIG_WILLOW_DEBUG_TIMERS
+        ESP_LOGW(TAG, "before esp_timer_dump!!!");
         (esp_timer_dump(stdout));
 #endif
-        vTaskDelay(5000 / portTICK_PERIOD_MS);
+    //    ESP_LOGW(TAG, "before vTaskDelay!!!");
+        vTaskDelay(15000 / portTICK_PERIOD_MS);
+    //    ESP_LOGW(TAG, "end loop!!!");
     }
+  //  ESP_LOGW(TAG, "finish main!!!");
 }

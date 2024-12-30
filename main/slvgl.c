@@ -4,6 +4,8 @@
 #include "esp_lcd_panel_ops.h"
 #include "esp_lcd_touch_gt911.h"
 #include "esp_lcd_touch_tt21100.h"
+#include "esp_lcd_touch_cst816s.h"
+
 #include "esp_log.h"
 #include "esp_lvgl_port.h"
 #include "esp_timer.h"
@@ -43,6 +45,7 @@ typedef struct periph_lcd {
 enum esp32_s3_box_touch_t {
     TOUCH_GT911,
     TOUCH_TT21100,
+    TOUCH_CST816,
 };
 esp_lcd_panel_handle_t hdl_lcd = NULL;
 int lvgl_lock_timeout;
@@ -128,6 +131,14 @@ esp_err_t init_lvgl_display(void)
     return ret;
 }
 
+static esp_lcd_panel_io_i2c_config_t cfg_lpiic_816s(int addr)
+{
+    esp_lcd_panel_io_i2c_config_t cfg_io_lt = ESP_LCD_TOUCH_IO_I2C_CST816S_CONFIG();
+    cfg_io_lt.dev_addr = addr;
+
+    return cfg_io_lt;
+}
+
 static esp_lcd_panel_io_i2c_config_t cfg_lpiic_gt911(int addr)
 {
     esp_lcd_panel_io_i2c_config_t cfg_io_lt = ESP_LCD_TOUCH_IO_I2C_GT911_CONFIG();
@@ -153,6 +164,8 @@ esp_err_t init_lvgl_touch(void)
             __attribute__((fallthrough));
         case WILLOW_HW_ESP32_S3_BOX_3:
             break;
+        case WILLOW_HW_JC3636:
+            break;
         default:
             ESP_LOGI(TAG, "%s does not have a touch screen, skipping init", str_hw_type(hw_type));
             return ret;
@@ -168,28 +181,31 @@ esp_err_t init_lvgl_touch(void)
             .interrupt = 0,
             .reset = 0,
         },
-        .int_gpio_num = GPIO_NUM_3,
-        .rst_gpio_num = GPIO_NUM_NC,
+        .int_gpio_num = GPIO_NUM_41,
+        .rst_gpio_num = GPIO_NUM_40,
         .x_max = LCD_H_RES,
         .y_max = LCD_V_RES,
     };
 
     esp_lcd_panel_io_i2c_config_t cfg_io_lt;
 
-    if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS << 1) == ESP_OK) {
-        cfg_io_lt = cfg_lpiic_gt911(ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS);
-        touch_type = TOUCH_GT911;
-    } else if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP << 1) == ESP_OK) {
-        cfg_io_lt = cfg_lpiic_gt911(ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP);
-        touch_type = TOUCH_GT911;
-    } else if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_TT21100_ADDRESS << 1) == ESP_OK) {
-        cfg_io_lt = cfg_lpiic_tt21100();
-        cfg_lt.flags.mirror_x = true;
-        touch_type = TOUCH_TT21100;
-    } else {
-        ESP_LOGE(TAG, "touch screen not detected");
-        return ESP_ERR_NOT_FOUND;
-    }
+   // if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_CST816S_ADDRESS << 1) == ESP_OK) {
+        cfg_io_lt = cfg_lpiic_816s(ESP_LCD_TOUCH_IO_I2C_CST816S_ADDRESS);
+        touch_type = TOUCH_CST816;
+    // }else if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS << 1) == ESP_OK) {
+    //     cfg_io_lt = cfg_lpiic_gt911(ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS);
+    //     touch_type = TOUCH_GT911;
+    // } else if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP << 1) == ESP_OK) {
+    //     cfg_io_lt = cfg_lpiic_gt911(ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP);
+    //     touch_type = TOUCH_GT911;
+    // } else if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_TT21100_ADDRESS << 1) == ESP_OK) {
+    //     cfg_io_lt = cfg_lpiic_tt21100();
+    //     cfg_lt.flags.mirror_x = true;
+    //     touch_type = TOUCH_TT21100;
+    // } else {
+    //     ESP_LOGE(TAG, "touch screen not detected");
+    //     return ESP_ERR_NOT_FOUND;
+    // }
 
     ret = esp_lcd_new_panel_io_i2c((esp_lcd_i2c_bus_handle_t)0, &cfg_io_lt, &lcdp->lcd_io_handle);
     if (ret != ESP_OK) {
@@ -209,6 +225,12 @@ esp_err_t init_lvgl_touch(void)
         ret = esp_lcd_touch_new_i2c_tt21100(lcdp->lcd_io_handle, &cfg_lt, &hdl_lt);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "failed to initialize TT21100 touch screen: %s", esp_err_to_name(ret));
+            return ret;
+        }
+    } else if (touch_type == TOUCH_CST816) {
+        ret = esp_lcd_touch_new_i2c_cst816s(lcdp->lcd_io_handle, &cfg_lt, &hdl_lt);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "failed to initialize cst816 touch screen: %s", esp_err_to_name(ret));
             return ret;
         }
     }

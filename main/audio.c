@@ -64,7 +64,7 @@
 #define HTTP_STREAM_TIMEOUT_MS_POST_REQUEST 10 * 1000
 
 #define MULTINET_TWDT   30
-#define STR_WAKE_LEN    25
+#define STR_WAKE_LEN    49
 #define WIS_URL_TTS_ARG "?format=WAV&speaker=CLB&text="
 
 typedef enum willow_http_stream {
@@ -88,6 +88,7 @@ struct willow_audio_response war;
 
 static void cb_ea(esp_audio_state_t *state, void *data)
 {
+   // ESP_LOGW(TAG, "begin cb_ea!!!");
     ESP_LOGD(TAG, "ESP Audio Event received: %d", state->status);
     if (state->status > AUDIO_STATUS_RUNNING) {
         gpio_set_level(get_pa_enable_gpio(), 0);
@@ -96,18 +97,21 @@ static void cb_ea(esp_audio_state_t *state, void *data)
 
 static void play_audio_err(void *data)
 {
+ //   ESP_LOGW(TAG, "begin play_audio_err!!!");
     gpio_set_level(get_pa_enable_gpio(), 1);
     esp_audio_play(hdl_ea, AUDIO_CODEC_TYPE_DECODER, "spiffs://spiffs/user/audio/error.wav", 0);
 }
 
 void play_audio_ok(void *data)
 {
+  //  ESP_LOGW(TAG, "begin play_audio_ok!!!");
     gpio_set_level(get_pa_enable_gpio(), 1);
     esp_audio_play(hdl_ea, AUDIO_CODEC_TYPE_DECODER, "spiffs://spiffs/user/audio/success.wav", 0);
 }
 
 static void play_audio_wis_tts(void *data)
 {
+   // ESP_LOGW(TAG, "begin play_audio_wis_tts!!!");
     char *url = NULL;
     char *wis_tts_url = NULL;
 
@@ -141,6 +145,7 @@ static void noop(void *data)
 
 static void init_audio_response(void)
 {
+   // ESP_LOGW(TAG, "begin init_audio_response!!!");
     char *audio_response_type = config_get_char("audio_response_type", DEFAULT_AUDIO_RESPONSE_TYPE);
     if (strcmp(audio_response_type, "Chimes") == 0) {
         war.fn_err = play_audio_err;
@@ -157,6 +162,7 @@ static void init_audio_response(void)
 
 static esp_err_t cb_ae_hs(audio_element_handle_t el, audio_event_iface_msg_t *ev, void *data)
 {
+    //ESP_LOGW(TAG, "begin cb_ae_hs!!!");
     if (ev->cmd == AEL_MSG_CMD_REPORT_STATUS) {
         // if we get a AEL_MSG_CMD_REPORT_STATUS command we can check for errors in audio_element_status_t
         // 1-7 is error
@@ -170,13 +176,13 @@ static esp_err_t cb_ae_hs(audio_element_handle_t el, audio_event_iface_msg_t *ev
         willow_http_stream_t type_hs = (willow_http_stream_t)data;
         if (type_hs == WILLOW_HS_STT) {
             audio_recorder_trigger_stop(hdl_ar);
-            war.fn_err("Cannot Reach WIS");
+            war.fn_err("Недоступен WIS");
             ESP_LOGE(TAG, "Error opening STT endpoint (%d)", ae_status);
-            ui_pr_err("Cannot Reach WIS", "Check Server & Settings");
+            ui_pr_err("Недоступен WIS", "Проверьте сервер и настройки");
         } else if (type_hs == WILLOW_HS_ESP_AUDIO) {
             play_audio_err(NULL);
             ESP_LOGE(TAG, "Error opening ESP Audio endpoint (%d)", ae_status);
-            ui_pr_err("Cannot Reach WIS", "Check Server & Settings");
+            ui_pr_err("Недоступен WIS", "Проверьте сервер и настройки");
         }
     }
     return ESP_OK;
@@ -184,6 +190,7 @@ static esp_err_t cb_ae_hs(audio_element_handle_t el, audio_event_iface_msg_t *ev
 
 static esp_err_t hdl_ev_hs_esp_audio(http_stream_event_msg_t *msg)
 {
+   // ESP_LOGW(TAG, "begin hdl_ev_hs_esp_audio!!!");
     if (msg == NULL) {
         return ESP_ERR_INVALID_ARG;
     }
@@ -207,6 +214,7 @@ static esp_err_t hdl_ev_hs_esp_audio(http_stream_event_msg_t *msg)
 static void init_esp_audio(void)
 {
     audio_err_t ret = ESP_OK;
+    //ESP_LOGW(TAG, "before xQueueCreate!!!");
     q_ea = xQueueCreate(3, sizeof(esp_audio_state_t));
     esp_audio_cfg_t cfg_ea = {
         .cb_ctx = NULL,
@@ -223,15 +231,15 @@ static void init_esp_audio(void)
         .vol_handle = hdl_ahc,
         .vol_set = (audio_volume_set)audio_hal_set_volume,
     };
-
+ //   ESP_LOGW(TAG, "before esp_audio_create!!!");
     hdl_ea = esp_audio_create(&cfg_ea);
-
+ //   ESP_LOGW(TAG, "after http_stream_init!!!");
     http_stream_cfg_t cfg_hs = HTTP_STREAM_CFG_DEFAULT();
     cfg_hs.event_handle = hdl_ev_hs_esp_audio;
-
+ //   ESP_LOGW(TAG, "before http_stream_init!!!");
     audio_element_handle_t hdl_ae_hs = http_stream_init(&cfg_hs);
     audio_element_set_event_callback(hdl_ea, cb_ae_hs, (void *)WILLOW_HS_ESP_AUDIO);
-
+  //  ESP_LOGW(TAG, "before esp_audio_input_stream_add!!!");
     ret = esp_audio_input_stream_add(hdl_ea, hdl_ae_hs);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "failed to add HTTP input stream to ESP Audio");
@@ -239,7 +247,7 @@ static void init_esp_audio(void)
 
     spiffs_stream_cfg_t cfg_ss = SPIFFS_STREAM_CFG_DEFAULT();
     cfg_ss.type = AUDIO_STREAM_READER;
-
+  //  ESP_LOGW(TAG, "before spiffs_stream_init!!!");
     ret = esp_audio_input_stream_add(hdl_ea, spiffs_stream_init(&cfg_ss));
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "failed to add input stream to ESP Audio");
@@ -270,54 +278,62 @@ static void init_esp_audio(void)
         .task_prio = ESP_DECODER_TASK_PRIO,
         .task_stack = ESP_DECODER_TASK_STACK_SIZE,
     };
-
+  //  ESP_LOGW(TAG, "before esp_decoder_init!!!");
     ret = esp_audio_codec_lib_add(hdl_ea, AUDIO_CODEC_TYPE_DECODER,
                                   esp_decoder_init(&cfg_dec, ad, sizeof(ad) / sizeof(audio_decoder_t)));
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "failed to add decoder to ESP Audio");
     }
 
-    i2s_stream_cfg_t cfg_is = {
-        .buffer_len = I2S_STREAM_BUF_SIZE,
-        .expand_src_bits = I2S_BITS_PER_SAMPLE_16BIT,
-        .i2s_config = {
-            .bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT,
-            .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
-            .communication_format = I2S_COMM_FORMAT_STAND_I2S,
-            .dma_buf_count = 3,
-            .dma_buf_len = 300,
-            .fixed_mclk = 0,
-            .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM,
-            .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX | I2S_MODE_RX),
-            .sample_rate = 16000,
-            .tx_desc_auto_clear = true,
-            .use_apll = false, // not supported on ESP32-S3-BOX
-        },
-        .i2s_port = CODEC_ADC_I2S_PORT,
-        .install_drv = true,
-        .multi_out_num = 0,
-        .need_expand = true,
-        .out_rb_size = 8 * 1024, // default is 8 * 1024
-        .stack_in_ext = false,
-        .task_core = I2S_STREAM_TASK_CORE,
-        .task_prio = I2S_STREAM_TASK_PRIO,
-        .task_stack = I2S_STREAM_TASK_STACK,
-        .type = AUDIO_STREAM_WRITER,
-        .uninstall_drv = true,
-        .use_alc = false,
-        .volume = 0,
-    };
 
-    ret = esp_audio_output_stream_add(hdl_ea, i2s_stream_init(&cfg_is));
+   
+    i2s_stream_cfg_t i2s_cfg = I2S_STREAM_CFG_DEFAULT();
+    i2s_chan_config_t chan_cfg = {                                                               
+        .id = I2S_NUM_1,                                                             
+        .role = I2S_ROLE_MASTER,                                                
+        .dma_desc_num = 3,                                                      
+        .dma_frame_num = 300,                                                   
+        .auto_clear = true,                                                     
+    };
+    i2s_cfg.chan_cfg = chan_cfg;
+    i2s_std_config_t std_cfg = {
+        .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(16000),
+        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(16, I2S_SLOT_MODE_STEREO),
+    };
+    i2s_cfg.std_cfg = std_cfg;
+    i2s_cfg.type = AUDIO_STREAM_WRITER;
+    i2s_cfg.transmit_mode = I2S_COMM_MODE_STD;
+    i2s_cfg.use_alc = false;
+    i2s_cfg.volume = 0;
+    i2s_cfg.buffer_len = I2S_STREAM_BUF_SIZE;
+    i2s_cfg.need_expand = true;
+    i2s_cfg.multi_out_num = 0;
+    i2s_cfg.uninstall_drv = true;
+    i2s_cfg.out_rb_size = 8 * 1024; // default is 8 * 1024
+    i2s_cfg.task_stack = I2S_STREAM_TASK_STACK;
+    i2s_cfg.task_core = I2S_STREAM_TASK_CORE;
+    i2s_cfg.task_prio = I2S_STREAM_TASK_PRIO;
+    i2s_cfg.stack_in_ext = false;
+
+ //   ESP_LOGW(TAG, "before speaker_volume! i2s_stream_init!!!");
+    audio_element_handle_t i2s_stream_writer = i2s_stream_init(&i2s_cfg);
+  //  ESP_LOGW(TAG, "before esp_audio_output_stream_add!!!");
+    ret = esp_audio_output_stream_add(hdl_ea, i2s_stream_writer);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "failed to add output stream to ESP Audio");
     }
+ //   ESP_LOGW(TAG, "before config_get_int!!!");
     esp_audio_vol_set(hdl_ea, config_get_int("speaker_volume", DEFAULT_SPEAKER_VOLUME));
     ESP_LOGI(TAG, "audio player initialized");
+    //---------------------------------
+    // ESP_LOGE(TAG, "before play_audio_ok!!!");
+    // play_audio_ok(NULL);
+    //---------------------------------
 }
 
 static esp_err_t cb_ar_event(audio_rec_evt_t *are, void *data)
 {
+ //   ESP_LOGW(TAG, "begin cb_ar_event!!!");
     char *speech_rec_mode = NULL;
     int msg = -1;
 #if defined(WILLOW_SUPPORT_MULTINET)
@@ -392,7 +408,9 @@ static esp_err_t cb_ar_event(audio_rec_evt_t *are, void *data)
             if (strcmp(speech_rec_mode, "WIS") == 0) {
                 reset_timer(hdl_sess_timer, config_get_int("stream_timeout", DEFAULT_STREAM_TIMEOUT), false);
             }
+         //   ESP_LOGE(TAG, "before lvgl_port_lock(lvgl_lock_timeout)!!!");
             if (lvgl_port_lock(lvgl_lock_timeout)) {
+             //   ESP_LOGE(TAG, "after lvgl_port_lock(lvgl_lock_timeout)!!!");
                 lv_obj_add_flag(lbl_ln1, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
@@ -403,7 +421,8 @@ static esp_err_t cb_ar_event(audio_rec_evt_t *are, void *data)
                 if (strcmp(speech_rec_mode, "Multinet") == 0) {
                     lv_label_set_text_static(lbl_ln3, "Say local command...");
                 } else if (strcmp(speech_rec_mode, "WIS") == 0) {
-                    lv_label_set_text_static(lbl_ln3, "Say command...");
+                    ESP_LOGE(TAG, "Ожидаю команду...!!!");
+                    lv_label_set_text_static(lbl_ln3, "Ожидаю команду...");
                 } else {
                     return ESP_ERR_INVALID_ARG;
                 }
@@ -444,7 +463,7 @@ static esp_err_t cb_ar_event(audio_rec_evt_t *are, void *data)
                     lv_obj_clear_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_add_flag(lbl_ln3, LV_OBJ_FLAG_HIDDEN);
 
-                    lv_label_set_text_static(lbl_ln1, "I heard command:");
+                    lv_label_set_text_static(lbl_ln1, "Я услышала команду:");
                     lv_label_set_text(lbl_ln2, lookup_cmd_multinet(command_id));
                     lvgl_port_unlock();
                 }
@@ -464,15 +483,17 @@ static esp_err_t cb_ar_event(audio_rec_evt_t *are, void *data)
 
 static int feed_afe(int16_t *buf, int len, void *ctx, TickType_t ticks)
 {
+   // ESP_LOGW(TAG, "begin feed_afe!!!");
     if (buf == NULL || hdl_ae_rs_from_i2s == NULL) {
         return -1;
     }
-
+   // ESP_LOGW(TAG, "begin feed_afe active!!!");
     return raw_stream_read(hdl_ae_rs_from_i2s, (char *)buf, len);
 }
 
 static esp_err_t hdl_ev_hs_to_api(http_stream_event_msg_t *msg)
 {
+   // ESP_LOGW(TAG, "begin hdl_ev_hs_to_api!!!");
     if (msg == NULL) {
         return ESP_ERR_INVALID_ARG;
     }
@@ -543,13 +564,13 @@ static esp_err_t hdl_ev_hs_to_api(http_stream_event_msg_t *msg)
                 // when ESP HTTP Client terminates connection due to timeout we get -1
                 if (http_status == -1) {
                     ESP_LOGE(TAG, "WIS response took longer than %dms, connection aborted", HTTP_STREAM_TIMEOUT_MS);
-                    ui_pr_err("WIS timeout", "Check server performance");
+                    ui_pr_err("WIS таймаут", "Проверьте производительность сервера");
                 } else if (http_status == 401) {
                     ESP_LOGE(TAG, "WIS returned Unauthorized Access (HTTP 401)");
-                    ui_pr_err("WIS auth failed", "Check server & settings");
+                    ui_pr_err("WIS авторизация не удалась", "Проверьте сервер и настройки");
                 } else if (http_status == 406) {
                     ESP_LOGE(TAG, "WIS returned Unauthorized Speaker");
-                    ui_pr_err("Unauthorized Speaker", NULL);
+                    ui_pr_err("Неавторизованный Speaker", NULL);
                     war.fn_err("Unauthorized Speaker");
                 } else {
                     ESP_LOGE(TAG, "WIS returned HTTP error: %d", http_status);
@@ -598,7 +619,7 @@ static esp_err_t hdl_ev_hs_to_api(http_stream_event_msg_t *msg)
                 if (cJSON_IsString(speaker_status) && speaker_status->valuestring != NULL) {
                     lv_label_set_text(lbl_ln1, speaker_status->valuestring);
                 } else {
-                    lv_label_set_text(lbl_ln1, "I heard:");
+                    lv_label_set_text(lbl_ln1, "Я услышала:");
                 }
                 if (cJSON_IsString(text) && text->valuestring != NULL) {
                     lv_label_set_text(lbl_ln2, text->valuestring);
@@ -624,6 +645,7 @@ pause:
 
 static esp_err_t init_ap_to_api(void)
 {
+  //  ESP_LOGW(TAG, "begin init_ap_to_api!!!");
     ESP_LOGD(TAG, "init_ap_to_api()");
     // audio_element_handle_t hdl_ae_hs;
     audio_pipeline_cfg_t cfg_ap = DEFAULT_AUDIO_PIPELINE_CONFIG();
@@ -662,51 +684,93 @@ static esp_err_t init_ap_to_api(void)
 
 static esp_err_t start_rec(void)
 {
+  //  ESP_LOGW(TAG, "begin start_rec!!!");
     audio_element_handle_t hdl_ae_is;
     audio_pipeline_cfg_t cfg_ap = DEFAULT_AUDIO_PIPELINE_CONFIG();
     esp_err_t ret = ESP_OK;
-
+  //  ESP_LOGW(TAG, "before audio_pipeline_init!!!");
     hdl_ap = audio_pipeline_init(&cfg_ap);
     if (hdl_ap == NULL) {
         return ESP_FAIL;
     }
 
-    i2s_stream_cfg_t cfg_is = {
-        .buffer_len = I2S_STREAM_BUF_SIZE,
-        .expand_src_bits = I2S_BITS_PER_SAMPLE_16BIT,
-        .i2s_config = {
-            .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
-            .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
-            .communication_format = I2S_COMM_FORMAT_STAND_I2S,
-            .dma_buf_count = 3,
-            .dma_buf_len = 300,
-            .fixed_mclk = 0,
-            .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM,
-            .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX | I2S_MODE_RX),
-            .sample_rate = 44100,
-            .tx_desc_auto_clear = true,
-            .use_apll = false,	// not supported on ESP32-S3-BOX
-        },
-        .i2s_port = CODEC_ADC_I2S_PORT,
-        .install_drv = false,
-        .multi_out_num = 0,
-        .need_expand = false,
-        .out_rb_size = 8 * 1024, // default is 8 * 1024
-        .stack_in_ext = false,
-        .task_core = I2S_STREAM_TASK_CORE,
-        .task_prio = I2S_STREAM_TASK_PRIO,
-        .task_stack = I2S_STREAM_TASK_STACK,
-        .type = AUDIO_STREAM_READER,
-        .uninstall_drv = true,
-        .use_alc = false,
-        .volume = 0,
-    };
-    hdl_ae_is = i2s_stream_init(&cfg_is);
 
+//     i2s_stream_cfg_t i2s_cfg = I2S_STREAM_CFG_DEFAULT();
+//     // i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
+//     // i2s_cfg.chan_cfg = chan_cfg;
+//     i2s_chan_config_t chan_cfg = {                                                               
+//         .id = I2S_NUM_0,                                                             
+//         .role = I2S_ROLE_MASTER,                                                
+//         .dma_desc_num = 3,                                                      
+//         .dma_frame_num = 300,                                                   
+//         .auto_clear = true,                                                     
+//     };
+//     i2s_cfg.chan_cfg = chan_cfg;
+//     i2s_std_config_t std_cfg = {
+//         .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(16000),
+//         .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(16, I2S_SLOT_MODE_MONO),
+//         .gpio_cfg ={
+//             .mclk = -1,
+//             .bclk = GPIO_NUM_42,
+//             .ws = GPIO_NUM_45,
+//             .dout = -1,
+//             .din = GPIO_NUM_46,
+//         },
+//     };
+//     i2s_cfg.std_cfg = std_cfg;
+//     i2s_cfg.type = AUDIO_STREAM_READER;
+//     i2s_cfg.transmit_mode = I2S_COMM_MODE_STD;
+//   //  i2s_cfg.use_apll = true;
+//     i2s_cfg.volume = 100;
+    i2s_stream_cfg_t i2s_cfg = I2S_STREAM_CFG_DEFAULT();
+    // i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
+    // i2s_cfg.chan_cfg = chan_cfg;
+    i2s_chan_config_t chan_cfg = {                                                               
+        .id = I2S_NUM_0,                                                             
+        .role = I2S_ROLE_MASTER,                                                
+        .dma_desc_num = 3,                                                      
+        .dma_frame_num = 300,                                                   
+        .auto_clear = true,                                                     
+    };
+    i2s_cfg.chan_cfg = chan_cfg;
+    i2s_std_config_t std_cfg = {
+        .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(44100),
+        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_32BIT, I2S_SLOT_MODE_MONO),
+        // .gpio_cfg ={
+        //     .mclk = GPIO_NUM_21,
+        //     .bclk = GPIO_NUM_18,
+        //     .ws = GPIO_NUM_16,
+        //     .dout = GPIO_NUM_17,
+        //     .din = -1,
+        // },
+    };
+    i2s_cfg.std_cfg = std_cfg;
+    i2s_cfg.type = AUDIO_STREAM_READER;
+    i2s_cfg.transmit_mode = I2S_COMM_MODE_STD;
+    i2s_cfg.use_alc = false;
+    i2s_cfg.volume = 0;
+    i2s_cfg.buffer_len = I2S_STREAM_BUF_SIZE;
+    i2s_cfg.need_expand = false;
+    i2s_cfg.multi_out_num = 0;
+    i2s_cfg.uninstall_drv = false;
+    i2s_cfg.out_rb_size = 8 * 1024; // default is 8 * 1024
+    i2s_cfg.task_stack = I2S_STREAM_TASK_STACK;
+   // i2s_cfg.task_core = I2S_STREAM_TASK_CORE;
+    i2s_cfg.task_core = 1;
+    i2s_cfg.task_prio = I2S_STREAM_TASK_PRIO;
+    i2s_cfg.stack_in_ext = false;
+  //  i2s_cfg.use_apll = true;
+    i2s_cfg.volume = 100;
+
+  //  ESP_LOGW(TAG, "before mic i2s_stream_init!!!");
+    hdl_ae_is = i2s_stream_init(&i2s_cfg);
+  //  ESP_LOGW(TAG, "before i2s_stream_set_clk!!!");
+    //i2s_stream_set_clk(hdl_ae_is, 16000, 16, I2S_TDM_SLOT0 | I2S_TDM_SLOT1 | I2S_TDM_SLOT2 | I2S_TDM_SLOT3);
     i2s_stream_set_clk(hdl_ae_is, 16000, 32, 2);
 
     raw_stream_cfg_t cfg_rs = RAW_STREAM_CFG_DEFAULT();
     cfg_rs.type = AUDIO_STREAM_READER;
+  //  ESP_LOGW(TAG, "before raw_stream_init!!!");
     hdl_ae_rs_from_i2s = raw_stream_init(&cfg_rs);
 
     audio_pipeline_register(hdl_ap, hdl_ae_is, "i2s_stream_reader");
@@ -718,6 +782,7 @@ static esp_err_t start_rec(void)
 
     audio_pipeline_run(hdl_ap);
 
+ //   ESP_LOGW(TAG, "before config_get_char!!!");
     char *wake_mode = config_get_char("wake_mode", DEFAULT_WAKE_MODE);
     int wakenet_mode = -1;
     if (strcmp(wake_mode, "2CH_90") == 0) {
@@ -737,9 +802,13 @@ static esp_err_t start_rec(void)
 
     afe_config_t cfg_afe = {
         .aec_init = config_get_bool("aec", true),
+      //  .aec_init = false,
         .se_init = config_get_bool("bss", true),
+      //  .se_init = false,
         .vad_init = true,
+      //  .vad_init = false,
         .wakenet_init = true,
+     //   .wakenet_init = false,
         .voice_communication_init = false,
         .voice_communication_agc_init = false,
         .voice_communication_agc_gain = 15,
@@ -748,10 +817,13 @@ static esp_err_t start_rec(void)
         .wakenet_model_name = NULL,
         .afe_linear_gain = 1.0,
         .afe_mode = SR_MODE_HIGH_PERF,
+       // .afe_mode = SR_MODE_LOW_COST,
         .afe_perferred_core = 1,
+       // .afe_perferred_core = 0,
         .afe_perferred_priority = 5,
         .afe_ringbuf_size = 50,
         .memory_alloc_mode = AFE_MEMORY_ALLOC_MORE_PSRAM,
+      //  .memory_alloc_mode = AFE_MEMORY_ALLOC_MORE_INTERNAL,
         .agc_mode = AFE_MN_PEAK_AGC_MODE_3,
         .pcm_config.total_ch_num = 3,
         .pcm_config.mic_num = 2,
@@ -759,11 +831,13 @@ static esp_err_t start_rec(void)
         .pcm_config.sample_rate = 16000,
         .debug_init = false,
         .debug_hook = {{AFE_DEBUG_HOOK_MASE_TASK_IN, NULL}, {AFE_DEBUG_HOOK_FETCH_TASK_IN, NULL}},
+        //.debug_hook = {{AFE_DEBUG_HOOK_MAX, NULL}},
+        
     };
 
     // E (5727) AFE_SR: sample_rate only support 16000, please modify it!
-    // cfg_srr.afe_cfg.pcm_config.sample_rate = CFG_AUDIO_SR_SAMPLE_RATE;
-
+    //cfg_srr.afe_cfg.pcm_config.sample_rate = CFG_AUDIO_SR_SAMPLE_RATE;
+   // ESP_LOGW(TAG, "before config_get_char2!!!");
     char *wake_word = config_get_char("wake_word", DEFAULT_WAKE_WORD);
     recorder_sr_cfg_t cfg_srr = {
         .afe_cfg = cfg_afe,
@@ -783,7 +857,7 @@ static esp_err_t start_rec(void)
 
     ESP_LOGI(TAG, "Using record buffer '%d'", config_get_int("record_buffer", DEFAULT_RECORD_BUFFER));
     cfg_srr.rb_size = config_get_int("record_buffer", DEFAULT_RECORD_BUFFER) * 1024;
-
+  //  ESP_LOGW(TAG, "before config_get_char3!!!");
     char *speech_rec_mode = config_get_char("speech_rec_mode", DEFAULT_SPEECH_REC_MODE);
     if (strcmp(speech_rec_mode, "Multinet") == 0) {
 #if defined(WILLOW_SUPPORT_MULTINET)
@@ -806,10 +880,11 @@ static esp_err_t start_rec(void)
         ESP_LOGE(TAG, "multinet not supported but enabled in config");
 #endif
     }
+   // ESP_LOGW(TAG, "before free speech_rec_mode!!!");
     free(speech_rec_mode);
 
     recorder_encoder_cfg_t recorder_encoder_cfg = {0};
-
+  //  ESP_LOGW(TAG, "before config_get_char4!!!");
     char *audio_codec = config_get_char("audio_codec", DEFAULT_AUDIO_CODEC);
     if (strcmp(audio_codec, "AMR-WB") == 0) {
         amrwb_encoder_cfg_t amrwb_cfg = DEFAULT_AMRWB_ENCODER_CONFIG();
@@ -819,7 +894,7 @@ static esp_err_t start_rec(void)
         amrwb_cfg.task_prio = 5;
         amrwb_cfg.out_rb_size = 8 * 1024;
         amrwb_cfg.bitrate_mode = AMRWB_ENC_BITRATE_MD2385;
-
+    //    ESP_LOGW(TAG, "before amrwb_encoder_init!!!");
         recorder_encoder_cfg.encoder = amrwb_encoder_init(&amrwb_cfg);
     } else if (strcmp(audio_codec, "WAV") == 0) {
         wav_encoder_cfg_t wav_cfg = DEFAULT_WAV_ENCODER_CONFIG();
@@ -827,10 +902,10 @@ static esp_err_t start_rec(void)
         wav_cfg.task_core = 0;
         wav_cfg.task_prio = 5;
         wav_cfg.out_rb_size = 8 * 1024;
-
+     //   ESP_LOGW(TAG, "before wav_encoder_init!!!");
         recorder_encoder_cfg.encoder = wav_encoder_init(&wav_cfg);
     }
-
+    //ESP_LOGW(TAG, "before config_get_int!!!");
     audio_rec_cfg_t cfg_ar = {
         .pinned_core = AUDIO_REC_DEF_TASK_CORE,
         .task_prio = AUDIO_REC_DEF_TASK_PRIO,
@@ -847,20 +922,24 @@ static esp_err_t start_rec(void)
         .encoder_handle = NULL,
         .encoder_iface = NULL,
     };
+   // ESP_LOGW(TAG, "before recorder_sr_create!!!");
     cfg_ar.sr_handle = recorder_sr_create(&cfg_srr, &cfg_ar.sr_iface);
+   // ESP_LOGW(TAG, "after recorder_sr_create!!!");
     if (strcmp(audio_codec, "AMR-WB") == 0 || strcmp(audio_codec, "WAV") == 0) {
         ESP_LOGI(TAG, "Using recorder encoder");
         cfg_ar.encoder_handle = recorder_encoder_create(&recorder_encoder_cfg, &cfg_ar.encoder_iface);
     }
+   // ESP_LOGW(TAG, "before free(audio_codec)!!!");
     free(audio_codec);
+   // ESP_LOGW(TAG, "before free(wake_word)!!!");
     free(wake_word);
 
     if (cfg_ar.sr_handle == NULL) {
         ESP_LOGE(TAG, "failed to init SR recorder");
-        ui_pr_err("Recorder init failed", "Check logs");
+        ui_pr_err("Микрофон неинициализировался", "Проверьте логи");
         return ESP_FAIL;
     }
-
+   // ESP_LOGW(TAG, "before audio_recorder_create!!!");
     hdl_ar = audio_recorder_create(&cfg_ar);
 
     return ret;
@@ -868,6 +947,7 @@ static esp_err_t start_rec(void)
 
 static void at_read(void *data)
 {
+   // ESP_LOGW(TAG, "begin at_read!!!");
     const int len = 2 * 1024;
     char *buf = audio_calloc(1, len);
     int msg = -1, ret = 0;
@@ -877,6 +957,7 @@ static void at_read(void *data)
         if (xQueueReceive(q_rec, &msg, delay) == pdTRUE) {
             switch (msg) {
                 case MSG_START:
+                  //  ESP_LOGE(TAG, "before MSG_START!!!");  
                     delay = 0;
                     recording = true;
                     audio_pipeline_stop(hdl_ap_to_api);
@@ -892,12 +973,15 @@ static void at_read(void *data)
                     recording = true;
                     break;
                 case MSG_STOP:
+                 //   ESP_LOGE(TAG, "before MSG_STOP!!!");    
                     delay = portMAX_DELAY;
                     audio_element_set_ringbuf_done(hdl_ae_rs_to_api);
                     recording = false;
                     stream_to_api = false;
+                  //  ESP_LOGE(TAG, "before lvgl_port_lock(lvgl_lock_timeout)!!!"); 
                     if (lvgl_port_lock(lvgl_lock_timeout)) {
-                        lv_label_set_text_static(lbl_ln3, multiwake_won ? "Thinking..." : "WOW Active - Exiting");
+                        ESP_LOGE(TAG, "Думаю...!!!"); 
+                        lv_label_set_text_static(lbl_ln3, multiwake_won ? "Думаю..." : "WOW Active - Exiting");
                         lv_obj_add_flag(btn_cancel, LV_OBJ_FLAG_HIDDEN);
                         lvgl_port_unlock();
                     }
@@ -937,6 +1021,7 @@ static void at_read(void *data)
 
 esp_err_t volume_set(int volume)
 {
+ //   ESP_LOGW(TAG, "begin volume_set!!!");
     if (volume < 0) {
         volume = config_get_int("speaker_volume", DEFAULT_SPEAKER_VOLUME);
     }
@@ -945,41 +1030,51 @@ esp_err_t volume_set(int volume)
 
 esp_err_t init_audio(void)
 {
+  //  ESP_LOGW(TAG, "begin init_audio!!!");
     char *speech_rec_mode = config_get_char("speech_rec_mode", DEFAULT_SPEECH_REC_MODE);
     char *wake_word = config_get_char("wake_word", DEFAULT_WAKE_WORD);
     esp_err_t ret = ESP_OK;
     int gpio_level;
 
+  //  ESP_LOGW(TAG, "before audio_board_codec_init!!!");
     hdl_ahc = audio_board_codec_init();
     gpio_set_level(get_pa_enable_gpio(), 0);
     ret = audio_hal_ctrl_codec(hdl_ahc, AUDIO_HAL_CODEC_MODE_BOTH, AUDIO_HAL_CTRL_START);
     ESP_LOGI(TAG, "audio_hal_ctrl_codec: %s", esp_err_to_name(ret));
+   // ESP_LOGW(TAG, "before init_esp_audio!!!");
     init_esp_audio();
+   // ESP_LOGW(TAG, "before volume_set!!!");
     volume_set(-1);
 
-    gpio_level = gpio_get_level(GPIO_NUM_1);
-    if (gpio_level == 0) {
-        ESP_LOGW(TAG, "mute is activated, please unmute to continue startup");
-        ui_pr_err("Mute Activated", "Unmute to continue");
-        while (gpio_get_level(GPIO_NUM_1) == 0) {
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
-        }
-    }
-
+    // gpio_level = gpio_get_level(GPIO_NUM_1);
+    // if (gpio_level == 0) {
+    //     ESP_LOGW(TAG, "mute is activated, please unmute to continue startup");
+    //     ui_pr_err("Микрофон заглушен", "Включите обратно для продолжения");
+    //     while (gpio_get_level(GPIO_NUM_1) == 0) {
+    //         vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //     }
+    // }
+   // ESP_LOGW(TAG, "before audio_board_adc_init!!!");
     hdl_aha = audio_board_adc_init();
-
+  //  ESP_LOGW(TAG, "before init_audio_response!!!");
     init_audio_response();
+   // ESP_LOGW(TAG, "before init_session_timer!!!");
     init_session_timer();
     if (strcmp(speech_rec_mode, "WIS") == 0) {
         init_ap_to_api();
     }
+  //  ESP_LOGW(TAG, "before free!!!");
     free(speech_rec_mode);
+  //  ESP_LOGW(TAG, "before start_rec!!!");
     ESP_RETURN_ON_ERROR(start_rec(), TAG, "start_rec failed");
-    es7210_adc_set_gain(config_get_int("mic_gain", DEFAULT_MIC_GAIN));
+  //  ret = start_rec();
+  //  ESP_LOGI(TAG, "start_rec: %s", esp_err_to_name(ret));
+    //es7210_adc_set_gain((ES7210_INPUT_MIC1 | ES7210_INPUT_MIC2 | ES7210_INPUT_MIC3 | ES7210_INPUT_MIC4), config_get_int("mic_gain", DEFAULT_MIC_GAIN));
 
     ESP_LOGI(TAG, "app_main() - start_rec() finished");
 
     q_rec = xQueueCreate(3, sizeof(int));
+   // ESP_LOGW(TAG, "before audio_thread_create!!!");
     audio_thread_create(&hdl_at, "at_read", at_read, NULL, 4 * 1024, 5, true, 0);
 
     char wake_help[STR_WAKE_LEN] = "";
@@ -989,7 +1084,7 @@ esp_err_t init_audio(void)
 #endif
     } else if (strcmp(wake_word, "alexa") == 0) {
 #if defined(CONFIG_SR_WN_WN9_ALEXA) || defined(CONFIG_SR_WN_WN9_ALEXA_MULTI)
-        strncpy(wake_help, "Say 'Alexa' to start!", STR_WAKE_LEN);
+        strncpy(wake_help, "Скажи 'Алекса' для старта!", STR_WAKE_LEN);
 #endif
     } else if (strcmp(wake_word, "hilexin") == 0) {
 #if defined(CONFIG_SR_WN_WN9_HILEXIN) || defined(CONFIG_SR_WN_WN9_HILEXIN_MULTI)
@@ -1001,10 +1096,11 @@ esp_err_t init_audio(void)
         ESP_LOGE(TAG, "selected wake word (%s) not supported", wake_word);
         strncpy(wake_help, "Ready!", STR_WAKE_LEN);
     }
+  //before audio_recorder_create!!!  ESP_LOGW(TAG, "before free wake_word!!!");
     free(wake_word);
 
     if (ld == NULL) {
-        ESP_LOGE(TAG, "lv_disp_t ld is NULL!!!!");
+     //   ESP_LOGE(TAG, "lv_disp_t ld is NULL!!!!");
     } else {
         if (lvgl_port_lock(lvgl_lock_timeout)) {
             lv_obj_add_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
@@ -1015,12 +1111,12 @@ esp_err_t init_audio(void)
             lvgl_port_unlock();
         }
     }
-
     return ret;
 }
 
 void deinit_audio(void)
 {
+  //  ESP_LOGW(TAG, "begin deinit_audio!!!");
     if (hdl_ar != NULL) {
         audio_recorder_destroy(hdl_ar);
     }

@@ -18,6 +18,7 @@ enum willow_hw_t hw_type;
 
 esp_err_t init_display(void)
 {
+  //  ESP_LOGW(TAG, "begin init_display!!!");
     ESP_LOGD(TAG, "initializing display");
 
     switch (hw_type) {
@@ -31,6 +32,16 @@ esp_err_t init_display(void)
             __attribute__((fallthrough));
         case WILLOW_HW_UNSUPPORTED:
             __attribute__((fallthrough));
+        case WILLOW_HW_GRC_AI_MODULE_V0_2:
+            __attribute__((fallthrough));
+        case WILLOW_HW_JC3636:
+            // bl_duty_max = 0;
+            // bl_duty_off = 1023;
+            // bl_duty_on = bl_duty_off - config_get_int("lcd_brightness", DEFAULT_LCD_BRIGHTNESS);
+            bl_duty_max = 1023;
+            bl_duty_off = 0;
+            bl_duty_on = config_get_int("lcd_brightness", DEFAULT_LCD_BRIGHTNESS);
+            break;
         case WILLOW_HW_ESP32_S3_BOX:
             __attribute__((fallthrough));
         case WILLOW_HW_ESP32_S3_BOX_3:
@@ -45,7 +56,8 @@ esp_err_t init_display(void)
     const ledc_channel_config_t cfg_bl_channel = {
         .channel = LEDC_CHANNEL_1,
         .duty = bl_duty_on,
-        .gpio_num = LCD_CTRL_GPIO,
+        // .gpio_num = LCD_CTRL_GPIO,
+        .gpio_num = LCD_CLK_GPIO,
         .hpoint = 0,
         .intr_type = LEDC_INTR_DISABLE,
         .speed_mode = LEDC_LOW_SPEED_MODE,
@@ -61,26 +73,26 @@ esp_err_t init_display(void)
     };
 
     int ret = ESP_OK;
-
+  //  ESP_LOGW(TAG, "begin audio_board_lcd_init!!!");
     hdl_lcd = (esp_lcd_panel_handle_t)audio_board_lcd_init(hdl_pset, NULL);
     ret = esp_lcd_panel_disp_on_off(hdl_lcd, true);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "failed to turn of display: %s", esp_err_to_name(ret));
         return ret;
     }
-
+ //   ESP_LOGW(TAG, "begin ledc_timer_config!!!");
     ret = ledc_timer_config(&cfg_bl_timer);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "failed to config LEDC timer for display backlight: %s", esp_err_to_name(ret));
         return ret;
     }
-
+ //   ESP_LOGW(TAG, "begin ledc_channel_config!!!");
     ret = ledc_channel_config(&cfg_bl_channel);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "failed to config LEDC channel for display backlight: %s", esp_err_to_name(ret));
         return ret;
     }
-
+  //  ESP_LOGW(TAG, "begin ledc_fade_func_install!!!");
     ret = ledc_fade_func_install(0);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "failed to install LEDC fade function: %s", esp_err_to_name(ret));
@@ -92,6 +104,7 @@ esp_err_t init_display(void)
 
 void display_set_backlight(const bool on, const bool max)
 {
+  //  ESP_LOGW(TAG, "begin display_set_backlight!!!");
     int duty;
 
     if (on) {
@@ -104,6 +117,7 @@ void display_set_backlight(const bool on, const bool max)
 
 void display_backlight_strobe_task(void *data)
 {
+  //  ESP_LOGW(TAG, "begin display_backlight_strobe_task!!!");
     int period_ms = MIN_STROBE_PERIOD;
     willow_strobe_parms_t *wsp = (willow_strobe_parms_t *)data;
 
@@ -116,6 +130,7 @@ void display_backlight_strobe_task(void *data)
     ESP_LOGI(TAG, "starting display backlight strobe effect with period '%d'", period_ms);
 
     while (true) {
+    //    ESP_LOGW(TAG, "begin display_backlight_strobe_task while (true)!!!");
         display_set_backlight(true, true);
         vTaskDelay(period_ms / portTICK_PERIOD_MS);
         display_set_backlight(false, false);

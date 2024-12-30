@@ -1,6 +1,8 @@
 ## IDF Component Manager Manifest File
 dependencies:
-  espressif/esp_lcd_touch_gt911: "1.1.0"
+  espressif/esp_lcd_touch_cst816s: "1.0.3"
+  espressif/esp_lcd_st77916: "1.0.0"
+  espressif/esp_lcd_touch_gt911: "1.1.1"
   lvgl/lvgl: "8.3.9"
   espressif/esp_websocket_client: "1.1.0"
   espressif/nghttp: "1.52.0"
@@ -9,7 +11,7 @@ dependencies:
   espressif/esp-dsp: "1.4.7"
   ## Required IDF version
   idf:
-    version: ">=5.1.0"
+    version: ">=5.1.1"
   # # Put list of dependencies here
   # # For components maintained by Espressif:
   # component: "~1.0.0"

@@ -7,7 +7,7 @@ set(COMPONENTS main)
 if($ENV{CI})
     message("CI detected, disabling MultiNet support")
 else()
-    add_definitions(-DWILLOW_SUPPORT_MULTINET)
+#    add_definitions(-DWILLOW_SUPPORT_MULTINET)
 endif()
 
 if(DEFINED ENV{WILLOW_VERSION})
