@@ -1,6 +1,6 @@
 # UPD
 
-Added support to run willow on JC3636W518EN ![pic](https://github.com/6PATyCb/willow/blob/JC3636W518EN-support/photo_2024-12-30_21-32-38.jpg?raw=true)
+Added support to run willow on JC3636W518EN ![pic](https://github.com/6PATyCb/willow/blob/JC3636W518EN-support/photo_2024-12-30_21-32-382.jpg?raw=true)
 
 Added font to support Cyrillic characters ([how to create font](https://forum.lvgl.io/t/esp32-lvgl-example-with-cyrillic-fonts/9756))
 
