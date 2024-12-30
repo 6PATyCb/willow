@@ -25,3 +25,5 @@ void deinit_audio(void);
 esp_err_t init_audio(void);
 void play_audio_ok(void *data);
 esp_err_t volume_set(int volume);
+void test_mic_beg(void);
+void test_mic_end(void);

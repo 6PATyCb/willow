@@ -33,7 +33,7 @@ static esp_err_t cb_iks(periph_service_handle_t hdl, periph_service_event_t *ev,
             };
 
             es7210_adc_init(&cfg_ahc);
-            es7210_adc_set_gain(config_get_int("mic_gain", DEFAULT_MIC_GAIN));
+            es7210_adc_set_gain((ES7210_INPUT_MIC1 | ES7210_INPUT_MIC2 | ES7210_INPUT_MIC3 | ES7210_INPUT_MIC4),config_get_int("mic_gain", DEFAULT_MIC_GAIN));
         }
     }
 

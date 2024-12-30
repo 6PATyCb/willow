@@ -31,6 +31,7 @@
 static EventGroupHandle_t hdl_evg;
 static const char *TAG = "WILLOW/NETWORK";
 uint8_t mac_address[6] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55};
+int8_t power = 20;
 
 void cb_sntp(struct timeval *tv)
 {
@@ -130,6 +131,31 @@ static void hdlr_ev(void *arg, esp_event_base_t ev_base, int32_t ev_id, void *da
     if (ev_base == WIFI_EVENT && ev_id == WIFI_EVENT_STA_DISCONNECTED) {
         if (!restarting) {
             ESP_LOGI(TAG, "disconnected from AP, retrying");
+
+            esp_err_t ret = ESP_OK;
+            int8_t readed_power = 0;
+            ret = esp_wifi_get_max_tx_power(&readed_power);
+            if (ret != ESP_OK) {
+                ESP_LOGE(TAG, "failed to read Wi-Fi max power: %s", esp_err_to_name(ret));
+                return;
+            }else {
+                ESP_LOGI(TAG, "readed Wi-Fi max power success: %d" , readed_power);
+            } 
+          //  power = power + 1;
+
+            if(readed_power != 20 ){
+                power = 20;
+                ret = esp_wifi_set_max_tx_power(power);
+                if (ret != ESP_OK) {
+                    ESP_LOGE(TAG, "failed to set Wi-Fi max power: %s", esp_err_to_name(ret));
+                }else {
+                    ESP_LOGI(TAG, "set Wi-Fi max power success: %d" , power);
+                } 
+            }
+
+                       
+
+
             esp_wifi_connect();
         }
         return;
@@ -146,6 +172,7 @@ static void hdlr_ev(void *arg, esp_event_base_t ev_base, int32_t ev_id, void *da
 #ifndef CONFIG_WILLOW_ETHERNET
 esp_err_t init_wifi(const char *psk, const char *ssid)
 {
+    ESP_LOGI(TAG, "begin init wifi!!!!");
     esp_err_t ret = ESP_OK;
 
     hdl_evg = xEventGroupCreate();
@@ -174,7 +201,7 @@ esp_err_t init_wifi(const char *psk, const char *ssid)
     if (lvgl_port_lock(lvgl_lock_timeout)) {
         lv_obj_clear_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
         lv_obj_set_style_text_align(lbl_ln4, LV_TEXT_ALIGN_CENTER, 0);
-        lv_label_set_text_static(lbl_ln4, "Connecting to Wi-Fi...");
+        lv_label_set_text_static(lbl_ln4, "Подключаемся к Wi-Fi...");
         lvgl_port_unlock();
     }
 
@@ -186,16 +213,28 @@ esp_err_t init_wifi(const char *psk, const char *ssid)
     }
 
     wifi_config_t cfg_wifi = {};
+    
     strlcpy((char *)cfg_wifi.sta.password, psk, sizeof(cfg_wifi.sta.password));
     strlcpy((char *)cfg_wifi.sta.ssid, ssid, sizeof(cfg_wifi.sta.ssid));
-
+    // ESP_LOGE(TAG, "cfg_wifi.sta.password Wi-Fi1: '%s'", cfg_wifi.sta.password);
+    // ESP_LOGE(TAG, "cfg_wifi.sta.ssid Wi-Fi1: '%s'", cfg_wifi.sta.ssid);
+    // strlcpy((char *)cfg_wifi.sta.password, "test", sizeof(cfg_wifi.sta.password));
+    // strlcpy((char *)cfg_wifi.sta.ssid, "test", sizeof(cfg_wifi.sta.ssid));
+    // ESP_LOGE(TAG, "cfg_wifi.sta.password Wi-Fi2: '%s'", cfg_wifi.sta.password);
+    // ESP_LOGE(TAG, "cfg_wifi.sta.ssid Wi-Fi2: '%s'", cfg_wifi.sta.ssid);
     set_hostname(ESP_MAC_WIFI_STA);
-
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ret = esp_wifi_set_config(ESP_IF_WIFI_STA, &cfg_wifi);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "failed to set Wi-Fi config: %s", esp_err_to_name(ret));
         return ret;
     }
+    // wifi_tx_rate_config_t tx_cfg_wifi  = {};
+    // ret =  esp_wifi_config_80211_tx(ESP_IF_WIFI_STA, tx_cfg_wifi);
+    // if (ret != ESP_OK) {
+    //     ESP_LOGE(TAG, "failed to set Wi-Fi tx config: %s", esp_err_to_name(ret));
+    //     return ret;
+    // }
 
     ret = esp_wifi_start();
     if (ret != ESP_OK) {

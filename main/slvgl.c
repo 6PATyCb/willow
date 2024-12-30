@@ -175,21 +175,21 @@ esp_err_t init_lvgl_touch(void)
     };
 
     esp_lcd_panel_io_i2c_config_t cfg_io_lt;
-
-    if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS << 1) == ESP_OK) {
+    //Проверка не работает корректно из-за семибитного лимита адреса
+   // if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS << 1) == ESP_OK) {
         cfg_io_lt = cfg_lpiic_gt911(ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS);
         touch_type = TOUCH_GT911;
-    } else if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP << 1) == ESP_OK) {
-        cfg_io_lt = cfg_lpiic_gt911(ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP);
-        touch_type = TOUCH_GT911;
-    } else if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_TT21100_ADDRESS << 1) == ESP_OK) {
-        cfg_io_lt = cfg_lpiic_tt21100();
-        cfg_lt.flags.mirror_x = true;
-        touch_type = TOUCH_TT21100;
-    } else {
-        ESP_LOGE(TAG, "touch screen not detected");
-        return ESP_ERR_NOT_FOUND;
-    }
+    // } else if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP << 1) == ESP_OK) {
+    //     cfg_io_lt = cfg_lpiic_gt911(ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP);
+    //     touch_type = TOUCH_GT911;
+    // } else if (i2c_bus_probe_addr(hdl_i2c_bus, ESP_LCD_TOUCH_IO_I2C_TT21100_ADDRESS << 1) == ESP_OK) {
+    //     cfg_io_lt = cfg_lpiic_tt21100();
+    //     cfg_lt.flags.mirror_x = true;
+    //     touch_type = TOUCH_TT21100;
+    // } else {
+    //     ESP_LOGE(TAG, "touch screen not detected");
+    //     return ESP_ERR_NOT_FOUND;
+    // }
 
     ret = esp_lcd_new_panel_io_i2c((esp_lcd_i2c_bus_handle_t)0, &cfg_io_lt, &lcdp->lcd_io_handle);
     if (ret != ESP_OK) {

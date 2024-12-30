@@ -81,11 +81,11 @@ void rest_send(const char *data)
         lv_obj_set_style_text_align(lbl_ln5, LV_TEXT_ALIGN_LEFT, 0);
         lv_obj_remove_event_cb(lbl_ln4, cb_btn_cancel);
         if (body != NULL && strlen(body) > 1) {
-            lv_label_set_text_static(lbl_ln4, "Response:");
+            lv_label_set_text_static(lbl_ln4, "Ответ:");
             lv_label_set_text(lbl_ln5, body);
         } else {
-            lv_label_set_text_static(lbl_ln4, "Command status:");
-            lv_label_set_text(lbl_ln5, ok ? "Success" : "Error");
+            lv_label_set_text_static(lbl_ln4, "Статус команды:");
+            lv_label_set_text(lbl_ln5, ok ? "Успешно" : "Ошибка");
         }
         lvgl_port_unlock();
     }

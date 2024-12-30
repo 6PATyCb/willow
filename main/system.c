@@ -5,6 +5,8 @@
 #include "esp_random.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "audio_element.h"
+#include "i2s_stream.h"
 #include "lvgl.h"
 #include "sdkconfig.h"
 
@@ -18,6 +20,8 @@ static const char *willow_hw_t[WILLOW_HW_MAX] = {
     [WILLOW_HW_ESP32_S3_BOX] = "ESP32-S3-BOX",
     [WILLOW_HW_ESP32_S3_BOX_LITE] = "ESP32-S3-BOX-Lite",
     [WILLOW_HW_ESP32_S3_BOX_3] = "ESP32-S3-BOX-3",
+    [WILLOW_HW_GRC_AI_MODULE_V0_2] = "GRC-AI-MODULE-v0.2",
+    [WILLOW_HW_JC3636] = "ESP32-S3-JC3636",
 };
 
 i2c_bus_handle_t hdl_i2c_bus;
@@ -39,6 +43,10 @@ static void set_hw_type(void)
     hw_type = WILLOW_HW_ESP32_S3_BOX_LITE;
 #elif defined(CONFIG_ESP32_S3_BOX_3_BOARD)
     hw_type = WILLOW_HW_ESP32_S3_BOX_3;
+#elif defined(CONFIG_ESP32_S3_GRC_AI_MODULE_V0_2_BOARD)
+    hw_type = WILLOW_HW_GRC_AI_MODULE_V0_2;
+#elif defined(CONFIG_ESP32_S3_JC3636_BOARD)
+    hw_type = WILLOW_HW_JC3636;
 #else
     hw_type = WILLOW_HW_UNSUPPORTED;
 #endif
@@ -47,6 +55,7 @@ static void set_hw_type(void)
 
 static esp_err_t init_ev_loop()
 {
+    ESP_LOGW(TAG, "begin init_ev_loop!!!");
     esp_err_t ret = esp_event_loop_create_default();
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "failed to initialize default event loop: %s", esp_err_to_name(ret));
@@ -56,6 +65,7 @@ static esp_err_t init_ev_loop()
 
 static void init_i2c(void)
 {
+    ESP_LOGW(TAG, "begin init_i2c!!!");
     int ret = ESP_OK;
     i2c_config_t i2c_cfg = {
         .mode = I2C_MODE_MASTER,
@@ -72,6 +82,7 @@ static void init_i2c(void)
 
 void init_system(void)
 {
+    ESP_LOGW(TAG, "begin init_system!!!");
     set_hw_type();
     init_i2c();
     ESP_ERROR_CHECK(init_ev_loop());
@@ -79,6 +90,7 @@ void init_system(void)
 
 void restart_delayed(void)
 {
+    ESP_LOGW(TAG, "begin restart_delayed!!!");
     uint32_t delay = esp_random() % 9;
     if (delay < 3) {
         delay = 3;
@@ -89,7 +101,7 @@ void restart_delayed(void)
     ESP_LOGI(TAG, "restarting after %" PRIu32 " seconds", delay);
 
     if (lvgl_port_lock(lvgl_lock_timeout)) {
-        lv_label_set_text_fmt(lbl_ln4, "Restarting in %" PRIu32 " seconds", delay);
+        lv_label_set_text_fmt(lbl_ln4, "Перезапустимся через %" PRIu32 " сек", delay);
         lv_obj_clear_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
         lvgl_port_unlock();
     }
