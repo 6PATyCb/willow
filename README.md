@@ -1,4 +1,4 @@
-#UPD
+# UPD
 
 Added font to support Cyrillic characters ([how to create font](https://forum.lvgl.io/t/esp32-lvgl-example-with-cyrillic-fonts/9756))
 
