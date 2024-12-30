@@ -1,3 +1,11 @@
+# UPD
+
+Added support to run willow on JC3636W518EN
+
+Added font to support Cyrillic characters ([how to create font](https://forum.lvgl.io/t/esp32-lvgl-example-with-cyrillic-fonts/9756))
+
+Updated esp-adf to 2.7 and esp-idf to 5.1.4
+
 # The Willow Inference Server has been released!
 
 Willow users can now self-host the [Willow Inference Server](https://github.com/toverainc/willow-inference-server) for lightning-fast language inference tasks with Willow and other applications (even WebRTC) including STT, TTS, LLM, and more!
