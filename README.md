@@ -10,7 +10,7 @@ This example for Windows 11 and WSL2
 
 1. Unpack current project to some dir (for me it's: `c:\Users\6PATyCb\Downloads\willow\my_git\willow_rus_box3\willow`)
 
-2. At the current project dir create docker image:
+2. Start `cmd`, and go to `current project dir` for create docker image:
 ```
 docker build -t willow_idf_5_1_1 .
 ```
