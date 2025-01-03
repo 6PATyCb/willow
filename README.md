@@ -26,15 +26,15 @@ docker run -it --rm --name willow -v c:\Users\6PATyCb\Downloads\willow\my_git\wi
 
 run once:
 ```
-./utils install
+./utils.sh install
 ```
 then (optional) you can customize esp-idf:
 ```
-./utils config
+./utils.sh config
 ```
 then make compile and dist:
 ```
-./utils build && ./utils dist 
+./utils.sh build && ./utils.sh dist 
 ```
 after all that you can get your firmware file at `current project dir/build/willow-dist.bin` and upload to your `JC3636W518EN` with `Google Chrome` by [web installer](https://tasmota.github.io/install/) using USB data cable
 
