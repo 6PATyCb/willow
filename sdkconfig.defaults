@@ -466,8 +466,8 @@ CONFIG_PARTITION_TABLE_MD5=y
 #
 # Willow Configuration
 #
-CONFIG_WIFI_SSID="private2"
-CONFIG_WIFI_PASSWORD="birukovabirukova"
+CONFIG_WIFI_SSID="myssid"
+CONFIG_WIFI_PASSWORD="mypass"
 CONFIG_WILLOW_WAS_URL="ws://192.168.133.252:8502/ws"
 
 #
