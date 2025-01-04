@@ -28,7 +28,7 @@ run once:
 ```
 ./utils.sh install
 ```
-then (optional) you can customize esp-idf:
+then you can customize esp-idf and Willow. Set wifi SSID, PASS and WAS URL
 ```
 ./utils.sh config
 ```
