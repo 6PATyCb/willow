@@ -18,6 +18,7 @@ set(COMPONENT_SRCS
     "ui.c"
     "was.c"
     "main.c"
+    "i18n.c"
 )
 set(COMPONENT_ADD_INCLUDEDIRS .)
 set(COMPONENT_PRIV_REQUIRES
@@ -44,6 +45,13 @@ register_component()
 spiffs_create_partition_image(user ../spiffs/user FLASH_IN_PROJECT)
 
 string(APPEND CMAKE_C_FLAGS -Werror)
+
+# Convert the string to integer for preprocessor comparison
+if ( "${CONFIG_WILLOW_UI_LANG}" STREQUAL "EN")
+    add_definitions( -DWILLOW_UI_LANG_EN=0 )
+elseif( "${CONFIG_WILLOW_UI_LANG}" STREQUAL "RU" )
+    add_definitions( -DWILLOW_UI_LANG_RU=1 )
+endif()
 
 # sdkconfig sanity checks
 if($ENV{WILLOW_SDKCONFIG_SANITY_CHECKS})

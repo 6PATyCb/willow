@@ -18,7 +18,7 @@ enum willow_hw_t hw_type;
 
 esp_err_t init_display(void)
 {
-    ESP_LOGW(TAG, "begin init_display!!!");
+   // ESP_LOGW(TAG, "begin init_display!!!");
     ESP_LOGD(TAG, "initializing display");
 
     switch (hw_type) {
@@ -97,7 +97,7 @@ esp_err_t init_display(void)
 
 void display_set_backlight(const bool on, const bool max)
 {
-    ESP_LOGW(TAG, "begin display_set_backlight!!!");
+  //  ESP_LOGW(TAG, "begin display_set_backlight!!!");
     int duty;
 
     if (on) {
@@ -110,7 +110,7 @@ void display_set_backlight(const bool on, const bool max)
 
 void display_backlight_strobe_task(void *data)
 {
-    ESP_LOGW(TAG, "begin display_backlight_strobe_task!!!");
+  //  ESP_LOGW(TAG, "begin display_backlight_strobe_task!!!");
     int period_ms = MIN_STROBE_PERIOD;
     willow_strobe_parms_t *wsp = (willow_strobe_parms_t *)data;
 
@@ -123,7 +123,7 @@ void display_backlight_strobe_task(void *data)
     ESP_LOGI(TAG, "starting display backlight strobe effect with period '%d'", period_ms);
 
     while (true) {
-        ESP_LOGW(TAG, "begin display_backlight_strobe_task while (true)!!!");
+       // ESP_LOGW(TAG, "begin display_backlight_strobe_task while (true)!!!");
         display_set_backlight(true, true);
         vTaskDelay(period_ms / portTICK_PERIOD_MS);
         display_set_backlight(false, false);

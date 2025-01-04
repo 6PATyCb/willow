@@ -55,7 +55,7 @@ static void set_hw_type(void)
 
 static esp_err_t init_ev_loop()
 {
-    ESP_LOGW(TAG, "begin init_ev_loop!!!");
+  //  ESP_LOGW(TAG, "begin init_ev_loop!!!");
     esp_err_t ret = esp_event_loop_create_default();
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "failed to initialize default event loop: %s", esp_err_to_name(ret));
@@ -65,7 +65,7 @@ static esp_err_t init_ev_loop()
 
 static void init_i2c(void)
 {
-    ESP_LOGW(TAG, "begin init_i2c!!!");
+  //  ESP_LOGW(TAG, "begin init_i2c!!!");
     int ret = ESP_OK;
     i2c_config_t i2c_cfg = {
         .mode = I2C_MODE_MASTER,
@@ -82,7 +82,7 @@ static void init_i2c(void)
 
 void init_system(void)
 {
-    ESP_LOGW(TAG, "begin init_system!!!");
+   // ESP_LOGW(TAG, "begin init_system!!!");
     set_hw_type();
     init_i2c();
     ESP_ERROR_CHECK(init_ev_loop());
@@ -90,7 +90,7 @@ void init_system(void)
 
 void restart_delayed(void)
 {
-    ESP_LOGW(TAG, "begin restart_delayed!!!");
+  //  ESP_LOGW(TAG, "begin restart_delayed!!!");
     uint32_t delay = esp_random() % 9;
     if (delay < 3) {
         delay = 3;
@@ -101,7 +101,11 @@ void restart_delayed(void)
     ESP_LOGI(TAG, "restarting after %" PRIu32 " seconds", delay);
 
     if (lvgl_port_lock(lvgl_lock_timeout)) {
-        lv_label_set_text_fmt(lbl_ln4, "Перезапустимся через %" PRIu32 " сек", delay);
+        #if defined(WILLOW_UI_LANG_RU)
+            lv_label_set_text_fmt(lbl_ln4, "Перезапустимся через %" PRIu32 " сек", delay);
+        #else
+            lv_label_set_text_fmt(lbl_ln4, "Restarting in %" PRIu32 " seconds", delay);
+        #endif
         lv_obj_clear_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
         lvgl_port_unlock();
     }

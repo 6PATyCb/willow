@@ -9,7 +9,7 @@
 #include "esp_websocket_client.h"
 #include "lvgl.h"
 #include "nvs_flash.h"
-
+#include "i18n.h"
 #include "audio.h"
 #include "config.h"
 #include "display.h"
@@ -48,7 +48,7 @@ static void send_hello_goodbye(const char *type);
 static void IRAM_ATTR cb_ws_event(const void *arg_evh, const esp_event_base_t *base_ev, const int32_t id_ev,
                                   const void *ev_data)
 {
-    ESP_LOGW(TAG, "begin cb_ws_event!!!");
+   // ESP_LOGW(TAG, "begin cb_ws_event!!!");
     esp_websocket_event_data_t *data = (esp_websocket_event_data_t *)ev_data;
     // components/esp_websocket_client/include/esp_websocket_client.h - enum esp_websocket_event_id_t
     switch (id_ev) {
@@ -102,12 +102,12 @@ static void IRAM_ATTR cb_ws_event(const void *arg_evh, const esp_event_base_t *b
                             if (cJSON_IsString(speech) && speech->valuestring != NULL
                                 && strlen(speech->valuestring) > 0) {
                                 cJSON_IsTrue(ok) ? war.fn_ok(speech->valuestring) : war.fn_err(speech->valuestring);
-                                lv_label_set_text_static(lbl_ln4, "Ответ:");
+                                lv_label_set_text_static(lbl_ln4, localize_text("Response:"));
                                 lv_label_set_text(lbl_ln5, speech->valuestring);
                             } else {
                                 cJSON_IsTrue(ok) ? war.fn_ok("Success") : war.fn_err("Error");
-                                lv_label_set_text_static(lbl_ln4, "Статус команды:");
-                                lv_label_set_text(lbl_ln5, cJSON_IsTrue(ok) ? "Успешно!" : "Ошибка");
+                                lv_label_set_text_static(lbl_ln4, localize_text("Command status:"));
+                                lv_label_set_text(lbl_ln5, cJSON_IsTrue(ok) ? localize_text("Success!") : localize_text("Error"));
                             }
                             lvgl_port_unlock();
                             reset_timer(hdl_display_timer, config_get_int("display_timeout", DEFAULT_DISPLAY_TIMEOUT),
@@ -353,7 +353,7 @@ cleanup:
 
 void was_deinit_task(void *data)
 {
-    ESP_LOGW(TAG, "begin was_deinit_task!!!");
+  //  ESP_LOGW(TAG, "begin was_deinit_task!!!");
     esp_err_t ret = ESP_OK;
     ESP_LOGI(TAG, "stopping WebSocket client");
 
@@ -372,7 +372,7 @@ void was_deinit_task(void *data)
 
 void deinit_was(void)
 {
-    ESP_LOGW(TAG, "begin deinit_was!!!");
+  //  ESP_LOGW(TAG, "begin deinit_was!!!");
     restarting = true;
     send_hello_goodbye("goodbye");
     // needs to be done in a task to avoid this error:
@@ -384,7 +384,7 @@ void deinit_was(void)
 
 esp_err_t init_was(void)
 {
-    ESP_LOGW(TAG, "begin init_was!!!");
+    //ESP_LOGW(TAG, "begin init_was!!!");
     if (restarting) {
         return ESP_OK;
     }
@@ -400,7 +400,7 @@ esp_err_t init_was(void)
     if (lvgl_port_lock(lvgl_lock_timeout)) {
         lv_obj_clear_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
         lv_obj_set_style_text_align(lbl_ln4, LV_TEXT_ALIGN_CENTER, 0);
-        lv_label_set_text_static(lbl_ln4, "Подключаемся к WAS...");
+        lv_label_set_text_static(lbl_ln4, "Connecting to WAS...");
         lvgl_port_unlock();
     }
 
@@ -425,7 +425,7 @@ esp_err_t init_was(void)
 
 static bool was_is_connected(const bool wait)
 {
-    ESP_LOGW(TAG, "begin was_is_connected!!!");
+   // ESP_LOGW(TAG, "begin was_is_connected!!!");
     if (esp_websocket_client_is_connected(hdl_wc)) {
         return true;
     }
@@ -438,7 +438,7 @@ static bool was_is_connected(const bool wait)
             }
             i++;
         }
-        ui_pr_err("WAS отключился", NULL);
+        ui_pr_err("WAS disconnected", NULL);
         return false;
     } else {
         return false;
@@ -447,7 +447,7 @@ static bool was_is_connected(const bool wait)
 
 esp_err_t was_send_endpoint(const char *data, bool nc_skip)
 {
-    ESP_LOGW(TAG, "begin was_send_endpoint!!!");
+  //  ESP_LOGW(TAG, "begin was_send_endpoint!!!");
     cJSON *in = NULL, *out = NULL;
     char *json = NULL;
     esp_err_t ret = ESP_OK;
@@ -490,7 +490,7 @@ cleanup:
 
 void request_config(void)
 {
-    ESP_LOGW(TAG, "begin request_config!!!");
+ //   ESP_LOGW(TAG, "begin request_config!!!");
     cJSON *cjson = NULL;
     char *json = NULL;
     esp_err_t ret;
@@ -519,7 +519,7 @@ cleanup:
 
 static void send_hello_goodbye(const char *type)
 {
-    ESP_LOGW(TAG, "begin send_hello_goodbye!!!");
+  //  ESP_LOGW(TAG, "begin send_hello_goodbye!!!");
     char *json;
     const char *hostname;
     uint8_t mac[6];
@@ -578,7 +578,7 @@ cleanup:
 
 void IRAM_ATTR send_wake_start(float wake_volume)
 {
-    ESP_LOGW(TAG, "begin send_wake_start!!!");
+ //   ESP_LOGW(TAG, "begin send_wake_start!!!");
     char *json;
     esp_err_t ret;
 
@@ -616,7 +616,7 @@ cleanup:
 
 void send_wake_end(void)
 {
-    ESP_LOGW(TAG, "begin send_wake_end!!!");
+   // ESP_LOGW(TAG, "begin send_wake_end!!!");
     char *json;
     esp_err_t ret;
 
@@ -651,7 +651,7 @@ cleanup:
 
 void cb_btn_cancel_notify(lv_event_t *ev)
 {
-    ESP_LOGW(TAG, "begin cb_btn_cancel_notify!!!");
+   // ESP_LOGW(TAG, "begin cb_btn_cancel_notify!!!");
     ESP_LOGD(TAG, "btn_cancel pressed");
     esp_audio_stop(hdl_ea, TERMINATION_TYPE_NOW);
     notify_active->cancel = true;
@@ -659,7 +659,7 @@ void cb_btn_cancel_notify(lv_event_t *ev)
 
 static void notify_task(void *data)
 {
-    ESP_LOGW(TAG, "begin notify_task!!!");
+   // ESP_LOGW(TAG, "begin notify_task!!!");
     TaskHandle_t hdl_task_strobe = NULL;
     cJSON *cjson = NULL;
     char *json = NULL;
@@ -678,7 +678,8 @@ static void notify_task(void *data)
 
     if (lvgl_port_lock(lvgl_lock_timeout)) {
         if (nd->text == NULL) {
-            lv_label_set_text_static(lbl_ln3, "Оповещение активировано");
+            
+            lv_label_set_text_static(lbl_ln3, localize_text("Notification Active"));
         } else {
             lv_label_set_text(lbl_ln3, nd->text);
             free(nd->text);

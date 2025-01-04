@@ -16,6 +16,12 @@ config WIFI_PASSWORD
 
         Can be left blank if the network is open.
 
+config WILLOW_UI_LANG
+    string "UI language - Supported: (EN|RU)"
+    default "EN"
+    help
+        Language for Willow UI. Supported EN, RU.
+
 config WILLOW_WAS_URL
     string "Willow Application Server URL"
     default "wss://was.local"
