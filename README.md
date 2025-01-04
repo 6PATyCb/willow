@@ -4,7 +4,7 @@ Added font to support Cyrillic characters ([how to create font](https://forum.lv
 
 Updated esp-adf to 2.7
 
-Added language selection. Available in EN or RU. Very simple implementation and not for all texts.
+Added UI language selection. Available in EN or RU. Very simple implementation and not for all texts.
 
 # How to build firmware
 
