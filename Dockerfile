@@ -28,8 +28,8 @@ COPY container.gitconfig /root/.gitconfig
 ENV PATH="$PATH:/willow/.local/bin"
 WORKDIR /willow
 
-ENV ADF_VER="willow-main-2024010900"
+ENV ADF_VER="willow-JC3636W518EN-20250105"
 RUN \
     cd /opt/esp/idf && \
-    curl https://raw.githubusercontent.com/toverainc/esp-adf/$ADF_VER/idf_patches/idf_v5.1_freertos.patch | patch -p1
+    curl https://raw.githubusercontent.com/6PATyCb/esp-adf/$ADF_VER/idf_patches/idf_v5.1_freertos.patch | patch -p1
 

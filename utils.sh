@@ -172,9 +172,9 @@ install() {
     cd deps
     # Setup ADF
     #git clone https://github.com/toverainc/esp-adf.git
-    git clone -b 'v2.7' --single-branch --depth 1 https://github.com/espressif/esp-adf
+    git clone https://github.com/6PATyCb/esp-adf.git
     cd $ADF_PATH
-    #git checkout "$ADF_VER"
+    git checkout "$ADF_VER"
     git submodule update --init components/esp-adf-libs
 
     # Setup esp-sr
