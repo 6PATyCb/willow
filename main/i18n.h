@@ -1,0 +1,1 @@
+char *localize_text(char *text);

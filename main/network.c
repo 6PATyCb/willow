@@ -8,7 +8,7 @@
 #include "lvgl.h"
 #include "lwip/ip_addr.h"
 #include "sdkconfig.h"
-
+#include "i18n.h"
 #include "config.h"
 #include "network.h"
 #include "shared.h"
@@ -131,31 +131,6 @@ static void hdlr_ev(void *arg, esp_event_base_t ev_base, int32_t ev_id, void *da
     if (ev_base == WIFI_EVENT && ev_id == WIFI_EVENT_STA_DISCONNECTED) {
         if (!restarting) {
             ESP_LOGI(TAG, "disconnected from AP, retrying");
-
-            esp_err_t ret = ESP_OK;
-            int8_t readed_power = 0;
-            ret = esp_wifi_get_max_tx_power(&readed_power);
-            if (ret != ESP_OK) {
-                ESP_LOGE(TAG, "failed to read Wi-Fi max power: %s", esp_err_to_name(ret));
-                return;
-            }else {
-                ESP_LOGI(TAG, "readed Wi-Fi max power success: %d" , readed_power);
-            } 
-          //  power = power + 1;
-
-            if(readed_power != 20 ){
-                power = 20;
-                ret = esp_wifi_set_max_tx_power(power);
-                if (ret != ESP_OK) {
-                    ESP_LOGE(TAG, "failed to set Wi-Fi max power: %s", esp_err_to_name(ret));
-                }else {
-                    ESP_LOGI(TAG, "set Wi-Fi max power success: %d" , power);
-                } 
-            }
-
-                       
-
-
             esp_wifi_connect();
         }
         return;
@@ -201,7 +176,7 @@ esp_err_t init_wifi(const char *psk, const char *ssid)
     if (lvgl_port_lock(lvgl_lock_timeout)) {
         lv_obj_clear_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
         lv_obj_set_style_text_align(lbl_ln4, LV_TEXT_ALIGN_CENTER, 0);
-        lv_label_set_text_static(lbl_ln4, "Подключаемся к Wi-Fi...");
+        lv_label_set_text_static(lbl_ln4, localize_text("Connecting to Wi-Fi..."));
         lvgl_port_unlock();
     }
 

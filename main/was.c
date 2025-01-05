@@ -9,7 +9,7 @@
 #include "esp_websocket_client.h"
 #include "lvgl.h"
 #include "nvs_flash.h"
-
+#include "i18n.h"
 #include "audio.h"
 #include "config.h"
 #include "display.h"
@@ -102,12 +102,12 @@ static void IRAM_ATTR cb_ws_event(const void *arg_evh, const esp_event_base_t *b
                             if (cJSON_IsString(speech) && speech->valuestring != NULL
                                 && strlen(speech->valuestring) > 0) {
                                 cJSON_IsTrue(ok) ? war.fn_ok(speech->valuestring) : war.fn_err(speech->valuestring);
-                                lv_label_set_text_static(lbl_ln4, "Ответ:");
+                                lv_label_set_text_static(lbl_ln4, localize_text("Response:"));
                                 lv_label_set_text(lbl_ln5, speech->valuestring);
                             } else {
                                 cJSON_IsTrue(ok) ? war.fn_ok("Success") : war.fn_err("Error");
-                                lv_label_set_text_static(lbl_ln4, "Статус команды:");
-                                lv_label_set_text(lbl_ln5, cJSON_IsTrue(ok) ? "Успешно!" : "Ошибка");
+                                lv_label_set_text_static(lbl_ln4, localize_text("Command status:"));
+                                lv_label_set_text(lbl_ln5, cJSON_IsTrue(ok) ? localize_text("Success!") : localize_text("Error"));
                             }
                             lvgl_port_unlock();
                             reset_timer(hdl_display_timer, config_get_int("display_timeout", DEFAULT_DISPLAY_TIMEOUT),
@@ -400,7 +400,7 @@ esp_err_t init_was(void)
     if (lvgl_port_lock(lvgl_lock_timeout)) {
         lv_obj_clear_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
         lv_obj_set_style_text_align(lbl_ln4, LV_TEXT_ALIGN_CENTER, 0);
-        lv_label_set_text_static(lbl_ln4, "Подключаемся к WAS...");
+        lv_label_set_text_static(lbl_ln4, "Connecting to WAS...");
         lvgl_port_unlock();
     }
 
@@ -438,7 +438,7 @@ static bool was_is_connected(const bool wait)
             }
             i++;
         }
-        ui_pr_err("WAS отключился", NULL);
+        ui_pr_err("WAS disconnected", NULL);
         return false;
     } else {
         return false;
@@ -678,7 +678,8 @@ static void notify_task(void *data)
 
     if (lvgl_port_lock(lvgl_lock_timeout)) {
         if (nd->text == NULL) {
-            lv_label_set_text_static(lbl_ln3, "Оповещение активировано");
+            
+            lv_label_set_text_static(lbl_ln3, localize_text("Notification Active"));
         } else {
             lv_label_set_text(lbl_ln3, nd->text);
             free(nd->text);

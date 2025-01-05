@@ -1,7 +1,7 @@
 #include "esp_err.h"
 #include "esp_log.h"
 #include "esp_lvgl_port.h"
-
+#include "i18n.h"
 #include "config.h"
 #include "shared.h"
 #include "slvgl.h"
@@ -74,8 +74,8 @@ void init_ui(void)
             lv_obj_add_style(lbl_btn_cancel, &lv_st_willow, 0);
 #endif
 
-            lv_label_set_text_static(lbl_btn_cancel, "Отмена");
-            lv_label_set_text_static(lbl_hdr, "Добро пожаловать в Willow!");
+            lv_label_set_text_static(lbl_btn_cancel, localize_text("Cancel"));
+            lv_label_set_text_static(lbl_hdr, localize_text("Welcome to Willow!"));
             lv_obj_add_flag(btn_cancel, LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(lbl_ln1, LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
@@ -104,7 +104,7 @@ void init_ui(void)
                 lv_label_set_text_static(lbl_ln3, "Multinet Not Supported");
 #endif
             } else if (strcmp(speech_rec_mode, "WIS") == 0) {
-                lv_label_set_text_static(lbl_ln3, "Стартуем (server)...");
+                lv_label_set_text_static(lbl_ln3, localize_text("Starting up (server)..."));
             }
             lv_obj_clear_flag(lbl_ln3, LV_OBJ_FLAG_HIDDEN);
 

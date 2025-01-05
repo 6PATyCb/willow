@@ -18,6 +18,9 @@ set(COMPONENT_SRCS
     "ui.c"
     "was.c"
     "main.c"
+    "i18n.c"
+    "console.c"
+    "cmd/cmd_willow.c"
 )
 set(COMPONENT_ADD_INCLUDEDIRS .)
 set(COMPONENT_PRIV_REQUIRES
@@ -33,6 +36,7 @@ set(COMPONENT_PRIV_REQUIRES
     esp_websocket_client
     input_key_service
     spiffs
+    console
 )
 
 if(CONFIG_WILLOW_ETHERNET)
@@ -44,6 +48,13 @@ register_component()
 spiffs_create_partition_image(user ../spiffs/user FLASH_IN_PROJECT)
 
 string(APPEND CMAKE_C_FLAGS -Werror)
+
+# Convert the string to integer for preprocessor comparison
+if ( "${CONFIG_WILLOW_UI_LANG}" STREQUAL "EN")
+    add_definitions( -DWILLOW_UI_LANG_EN=0 )
+elseif( "${CONFIG_WILLOW_UI_LANG}" STREQUAL "RU" )
+    add_definitions( -DWILLOW_UI_LANG_RU=1 )
+endif()
 
 # sdkconfig sanity checks
 if($ENV{WILLOW_SDKCONFIG_SANITY_CHECKS})

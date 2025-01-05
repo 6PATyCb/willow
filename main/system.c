@@ -9,7 +9,7 @@
 #include "i2s_stream.h"
 #include "lvgl.h"
 #include "sdkconfig.h"
-
+#include "console.h"
 #include "shared.h"
 #include "slvgl.h"
 #include "system.h"
@@ -86,6 +86,7 @@ void init_system(void)
     set_hw_type();
     init_i2c();
     ESP_ERROR_CHECK(init_ev_loop());
+    ESP_ERROR_CHECK(init_console());
 }
 
 void restart_delayed(void)
@@ -101,7 +102,11 @@ void restart_delayed(void)
     ESP_LOGI(TAG, "restarting after %" PRIu32 " seconds", delay);
 
     if (lvgl_port_lock(lvgl_lock_timeout)) {
+        #if defined(WILLOW_UI_LANG_RU)
         lv_label_set_text_fmt(lbl_ln4, "Перезапустимся через %" PRIu32 " сек", delay);
+        #else
+            lv_label_set_text_fmt(lbl_ln4, "Restarting in %" PRIu32 " seconds", delay);
+        #endif
         lv_obj_clear_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
         lvgl_port_unlock();
     }

@@ -25,7 +25,7 @@
 #include "spiffs_stream.h"
 #include "wav_decoder.h"
 #include "wav_encoder.h"
-
+#include "i18n.h"
 #include "audio.h"
 #include "config.h"
 #include "display.h"
@@ -176,13 +176,13 @@ static esp_err_t cb_ae_hs(audio_element_handle_t el, audio_event_iface_msg_t *ev
         willow_http_stream_t type_hs = (willow_http_stream_t)data;
         if (type_hs == WILLOW_HS_STT) {
             audio_recorder_trigger_stop(hdl_ar);
-            war.fn_err("Недоступен WIS");
+            war.fn_err(localize_text("Cannot Reach WIS"));
             ESP_LOGE(TAG, "Error opening STT endpoint (%d)", ae_status);
-            ui_pr_err("Недоступен WIS", "Проверьте сервер и настройки");
+            ui_pr_err(localize_text("Cannot Reach WIS"), localize_text("Check Server & Settings"));
         } else if (type_hs == WILLOW_HS_ESP_AUDIO) {
             play_audio_err(NULL);
             ESP_LOGE(TAG, "Error opening ESP Audio endpoint (%d)", ae_status);
-            ui_pr_err("Недоступен WIS", "Проверьте сервер и настройки");
+            ui_pr_err(localize_text("Cannot Reach WIS"), localize_text("Check Server & Settings"));
         }
     }
     return ESP_OK;
@@ -421,8 +421,8 @@ static esp_err_t cb_ar_event(audio_rec_evt_t *are, void *data)
                 if (strcmp(speech_rec_mode, "Multinet") == 0) {
                     lv_label_set_text_static(lbl_ln3, "Say local command...");
                 } else if (strcmp(speech_rec_mode, "WIS") == 0) {
-                    ESP_LOGE(TAG, "Ожидаю команду...!!!");
-                    lv_label_set_text_static(lbl_ln3, "Ожидаю команду...");
+                  //  ESP_LOGE(TAG, "Ожидаю команду...!!!");
+                    lv_label_set_text_static(lbl_ln3, localize_text("Say command..."));
                 } else {
                     return ESP_ERR_INVALID_ARG;
                 }
@@ -463,7 +463,7 @@ static esp_err_t cb_ar_event(audio_rec_evt_t *are, void *data)
                     lv_obj_clear_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_add_flag(lbl_ln3, LV_OBJ_FLAG_HIDDEN);
 
-                    lv_label_set_text_static(lbl_ln1, "Я услышала команду:");
+                    lv_label_set_text_static(lbl_ln1, localize_text("I heard command:"));
                     lv_label_set_text(lbl_ln2, lookup_cmd_multinet(command_id));
                     lvgl_port_unlock();
                 }
@@ -564,13 +564,13 @@ static esp_err_t hdl_ev_hs_to_api(http_stream_event_msg_t *msg)
                 // when ESP HTTP Client terminates connection due to timeout we get -1
                 if (http_status == -1) {
                     ESP_LOGE(TAG, "WIS response took longer than %dms, connection aborted", HTTP_STREAM_TIMEOUT_MS);
-                    ui_pr_err("WIS таймаут", "Проверьте производительность сервера");
+                    ui_pr_err(localize_text("WIS timeout"), localize_text("Check server performance"));
                 } else if (http_status == 401) {
                     ESP_LOGE(TAG, "WIS returned Unauthorized Access (HTTP 401)");
-                    ui_pr_err("WIS авторизация не удалась", "Проверьте сервер и настройки");
+                    ui_pr_err(localize_text("WIS auth failed"), localize_text("Check Server & Settings"));
                 } else if (http_status == 406) {
                     ESP_LOGE(TAG, "WIS returned Unauthorized Speaker");
-                    ui_pr_err("Неавторизованный Speaker", NULL);
+                    ui_pr_err("Unauthorized Speaker", NULL);
                     war.fn_err("Unauthorized Speaker");
                 } else {
                     ESP_LOGE(TAG, "WIS returned HTTP error: %d", http_status);
@@ -619,7 +619,7 @@ static esp_err_t hdl_ev_hs_to_api(http_stream_event_msg_t *msg)
                 if (cJSON_IsString(speaker_status) && speaker_status->valuestring != NULL) {
                     lv_label_set_text(lbl_ln1, speaker_status->valuestring);
                 } else {
-                    lv_label_set_text(lbl_ln1, "Я услышала:");
+                    lv_label_set_text(lbl_ln1, localize_text("I heard:"));
                 }
                 if (cJSON_IsString(text) && text->valuestring != NULL) {
                     lv_label_set_text(lbl_ln2, text->valuestring);
@@ -936,7 +936,7 @@ static esp_err_t start_rec(void)
 
     if (cfg_ar.sr_handle == NULL) {
         ESP_LOGE(TAG, "failed to init SR recorder");
-        ui_pr_err("Микрофон неинициализировался", "Проверьте логи");
+        ui_pr_err("Recorder init failed", "Check logs");
         return ESP_FAIL;
     }
    // ESP_LOGW(TAG, "before audio_recorder_create!!!");
@@ -980,8 +980,8 @@ static void at_read(void *data)
                     stream_to_api = false;
                   //  ESP_LOGE(TAG, "before lvgl_port_lock(lvgl_lock_timeout)!!!"); 
                     if (lvgl_port_lock(lvgl_lock_timeout)) {
-                        ESP_LOGE(TAG, "Думаю...!!!"); 
-                        lv_label_set_text_static(lbl_ln3, multiwake_won ? "Думаю..." : "WOW Active - Exiting");
+                      //  ESP_LOGE(TAG, "Думаю...!!!"); 
+                        lv_label_set_text_static(lbl_ln3, multiwake_won ? localize_text("Thinking...") : localize_text("WOW Active - Exiting"));
                         lv_obj_add_flag(btn_cancel, LV_OBJ_FLAG_HIDDEN);
                         lvgl_port_unlock();
                     }
@@ -1084,7 +1084,11 @@ esp_err_t init_audio(void)
 #endif
     } else if (strcmp(wake_word, "alexa") == 0) {
 #if defined(CONFIG_SR_WN_WN9_ALEXA) || defined(CONFIG_SR_WN_WN9_ALEXA_MULTI)
+    #if defined(WILLOW_UI_LANG_RU)
         strncpy(wake_help, "Скажи 'Алекса' для старта!", STR_WAKE_LEN);
+    #else
+        strncpy(wake_help, "Say 'Alexa' to start!", STR_WAKE_LEN);
+#endif
 #endif
     } else if (strcmp(wake_word, "hilexin") == 0) {
 #if defined(CONFIG_SR_WN_WN9_HILEXIN) || defined(CONFIG_SR_WN_WN9_HILEXIN_MULTI)

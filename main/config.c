@@ -9,7 +9,7 @@
 #include "esp_system.h"
 #include "esp_timer.h"
 #include "lvgl.h"
-
+#include "i18n.h"
 #include "audio.h"
 #include "config.h"
 #include "display.h"
@@ -147,7 +147,7 @@ close:
 
     ESP_LOGI(TAG, "%s updated, restarting", CONFIG_PATH);
     if (lvgl_port_lock(lvgl_lock_timeout)) {
-        lv_label_set_text_static(lbl_ln3, "Конфигурация обновлена");
+        lv_label_set_text_static(lbl_ln3, localize_text("Configuration Updated"));
         lv_obj_add_flag(lbl_ln1, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
