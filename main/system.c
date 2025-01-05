@@ -9,7 +9,7 @@
 #include "i2s_stream.h"
 #include "lvgl.h"
 #include "sdkconfig.h"
-
+#include "console.h"
 #include "shared.h"
 #include "slvgl.h"
 #include "system.h"
@@ -83,9 +83,11 @@ static void init_i2c(void)
 void init_system(void)
 {
    // ESP_LOGW(TAG, "begin init_system!!!");
+    
     set_hw_type();
     init_i2c();
     ESP_ERROR_CHECK(init_ev_loop());
+    ESP_ERROR_CHECK(init_console());
 }
 
 void restart_delayed(void)

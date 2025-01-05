@@ -14,14 +14,14 @@ esp_timer_handle_t hdl_display_timer = NULL, hdl_sess_timer = NULL;
 
 static void cb_display_timer(void *data)
 {
-    ESP_LOGW(TAG, "begin cb_display_timer!!!");
+ //   ESP_LOGW(TAG, "begin cb_display_timer!!!");
     ESP_LOGI(TAG, "Wake LCD timeout, turning off LCD");
     display_set_backlight(false, false);
 }
 
 static void cb_session_timer(void *data)
 {
-    ESP_LOGW(TAG, "begin cb_session_timer!!!");
+  //  ESP_LOGW(TAG, "begin cb_session_timer!!!");
     if (recording) {
         ESP_LOGI(TAG, "session timer expired - forcing end stream");
         audio_recorder_trigger_stop(hdl_ar);
@@ -32,7 +32,7 @@ static void cb_session_timer(void *data)
 
 esp_err_t init_display_timer(void)
 {
-    ESP_LOGW(TAG, "begin init_display_timer!!!");
+  //  ESP_LOGW(TAG, "begin init_display_timer!!!");
     const esp_timer_create_args_t cfg_et = {
         .callback = &cb_display_timer,
         .name = "display_timer",
@@ -43,7 +43,7 @@ esp_err_t init_display_timer(void)
 
 esp_err_t init_session_timer(void)
 {
-    ESP_LOGW(TAG, "begin init_session_timer!!!");
+ //   ESP_LOGW(TAG, "begin init_session_timer!!!");
     const esp_timer_create_args_t cfg_et = {
         .callback = &cb_session_timer,
         .name = "session_timer",
@@ -54,7 +54,7 @@ esp_err_t init_session_timer(void)
 
 esp_err_t reset_timer(esp_timer_handle_t hdl, int timeout, bool pause)
 {
-    ESP_LOGW(TAG, "begin reset_timer!!!");
+   // ESP_LOGW(TAG, "begin reset_timer!!!");
     if (esp_timer_is_active(hdl)) {
         esp_timer_stop(hdl);
     }

@@ -32,4 +32,7 @@ void init_logging(void)
     esp_log_level_set("WILLOW/TIMER", WILLOW_LOG_LEVEL);
     esp_log_level_set("WILLOW/UI", WILLOW_LOG_LEVEL);
     esp_log_level_set("WILLOW/WAS", WILLOW_LOG_LEVEL);
+    esp_log_level_set("WILLOW/i18n", WILLOW_LOG_LEVEL);
+    esp_log_level_set("WILLOW/CONSOLE", WILLOW_LOG_LEVEL);
+   
 }

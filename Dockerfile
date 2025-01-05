@@ -1,4 +1,4 @@
-FROM espressif/idf:v5.1.1
+FROM espressif/idf:v5.2.3
 
 ARG DEBIAN_FRONTEND="noninteractive"
 
@@ -30,4 +30,4 @@ WORKDIR /willow
 ENV ADF_VER="willow-main-2024010900"
 RUN \
     cd /opt/esp/idf && \
-    curl https://raw.githubusercontent.com/toverainc/esp-adf/$ADF_VER/idf_patches/idf_v5.1_freertos.patch | patch -p1
+    curl https://raw.githubusercontent.com/espressif/esp-adf/refs/tags/v2.7/idf_patches/idf_v5.2_freertos.patch | patch -p1

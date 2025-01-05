@@ -19,6 +19,8 @@ set(COMPONENT_SRCS
     "was.c"
     "main.c"
     "i18n.c"
+    "console.c"
+    "cmd/cmd_willow.c"
 )
 set(COMPONENT_ADD_INCLUDEDIRS .)
 set(COMPONENT_PRIV_REQUIRES
@@ -34,6 +36,7 @@ set(COMPONENT_PRIV_REQUIRES
     esp_websocket_client
     input_key_service
     spiffs
+    console
 )
 
 if(CONFIG_WILLOW_ETHERNET)
