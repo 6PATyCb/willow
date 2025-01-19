@@ -1,6 +1,6 @@
 # UPD
 
-![pic](https://github.com/6PATyCb/willow/blob/JC3636W518EN-support/photo_2024-12-30_21-32-38.jpg?raw=true)
+![pic](https://github.com/6PATyCb/willow/blob/JC3636W518EN-support/photo_2025-01-20_02-13-35.jpg?raw=true)
 
 Added support to run willow on JC3636W518EN 
 
@@ -12,7 +12,7 @@ Updated esp-idf to 5.2.3
 
 Added time indication
 
-Added simple MP3 Player from SD Card
+Added simple MP3 Player from SD Card (FAT32 only 32GB MAX size)
 
 Added UI language selection. Available in EN or RU. Very simple implementation and not for all texts. Worked only on compilation step.
 
