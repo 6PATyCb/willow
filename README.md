@@ -12,7 +12,7 @@ Updated esp-idf to 5.2.3
 
 Added time indication
 
-Added simple MP3 Player from SD Card (FAT32 only 32GB MAX size)
+Added simple MP3 Player from SD Card (FAT32 only 32GB MAX size). MP3 player starts working only after successfully connecting to WIFI and WAS. Click the music icon to start playing.
 
 Added UI language selection. Available in EN or RU. Very simple implementation and not for all texts. Worked only on compilation step.
 
