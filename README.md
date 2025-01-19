@@ -10,6 +10,10 @@ Updated esp-adf to 2.7
 
 Updated esp-idf to 5.2.3
 
+Added time indication
+
+Added simple MP3 Player from SD Card
+
 Added UI language selection. Available in EN or RU. Very simple implementation and not for all texts. Worked only on compilation step.
 
 Added console commands to config Wifi and WAS URL (use `help` command for details)

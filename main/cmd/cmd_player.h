@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-void register__willow_commands(void);
+void register_player_commands(void);
 
 #ifdef __cplusplus
 }

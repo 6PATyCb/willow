@@ -185,15 +185,16 @@ static void IRAM_ATTR cb_ws_event(const void *arg_evh, const esp_event_base_t *b
                     }
 
                     ESP_LOGI(TAG, "restarting to apply NVS changes");
-                    if (lvgl_port_lock(lvgl_lock_timeout)) {
-                        lv_label_set_text_static(lbl_ln3, "Connectivity Updated");
-                        lv_obj_add_flag(lbl_ln1, LV_OBJ_FLAG_HIDDEN);
-                        lv_obj_add_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
-                        lv_obj_add_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
-                        lv_obj_add_flag(lbl_ln5, LV_OBJ_FLAG_HIDDEN);
-                        lv_obj_clear_flag(lbl_ln3, LV_OBJ_FLAG_HIDDEN);
-                        lvgl_port_unlock();
-                    }
+                    show_center_text("Connectivity Updated");
+                    // if (lvgl_port_lock(lvgl_lock_timeout)) {
+                    //     lv_label_set_text_static(lbl_ln3, localize_text("Connectivity Updated"));
+                    //     lv_obj_add_flag(lbl_ln1, LV_OBJ_FLAG_HIDDEN);
+                    //     lv_obj_add_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
+                    //     lv_obj_add_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
+                    //     lv_obj_add_flag(lbl_ln5, LV_OBJ_FLAG_HIDDEN);
+                    //     lv_obj_clear_flag(lbl_ln3, LV_OBJ_FLAG_HIDDEN);
+                    //     lvgl_port_unlock();
+                    // }
                     reset_timer(hdl_display_timer, config_get_int("display_timeout", DEFAULT_DISPLAY_TIMEOUT), true);
                     display_set_backlight(true, false);
                     deinit_was();
@@ -318,15 +319,16 @@ static void IRAM_ATTR cb_ws_event(const void *arg_evh, const esp_event_base_t *b
 
                     if (strcmp(json_cmd->valuestring, "restart") == 0) {
                         ESP_LOGI(TAG, "restart command received. restart");
-                        if (lvgl_port_lock(lvgl_lock_timeout)) {
-                            lv_label_set_text_static(lbl_ln3, "WAS Restart");
-                            lv_obj_add_flag(lbl_ln1, LV_OBJ_FLAG_HIDDEN);
-                            lv_obj_add_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
-                            lv_obj_add_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
-                            lv_obj_add_flag(lbl_ln5, LV_OBJ_FLAG_HIDDEN);
-                            lv_obj_clear_flag(lbl_ln3, LV_OBJ_FLAG_HIDDEN);
-                            lvgl_port_unlock();
-                        }
+                        show_center_text("WAS Restart");
+                        // if (lvgl_port_lock(lvgl_lock_timeout)) {
+                        //     lv_label_set_text_static(lbl_ln3, localize_text("WAS Restart"));
+                        //     lv_obj_add_flag(lbl_ln1, LV_OBJ_FLAG_HIDDEN);
+                        //     lv_obj_add_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
+                        //     lv_obj_add_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
+                        //     lv_obj_add_flag(lbl_ln5, LV_OBJ_FLAG_HIDDEN);
+                        //     lv_obj_clear_flag(lbl_ln3, LV_OBJ_FLAG_HIDDEN);
+                        //     lvgl_port_unlock();
+                        // }
                         display_set_backlight(true, false);
                         deinit_was();
                         restart_delayed();

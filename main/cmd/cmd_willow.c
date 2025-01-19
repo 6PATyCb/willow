@@ -28,8 +28,7 @@ static struct {
 
 static int read_wifi(int argc, char **argv)
 {
-    ESP_LOGE(TAG, "read_wifi!!!");
-
+    ESP_LOGI(TAG, "read_wifi!!!");
     esp_err_t err;
     nvs_handle_t hdl_nvs;
     err = nvs_open("WIFI", NVS_READONLY, &hdl_nvs);
@@ -54,8 +53,8 @@ static int read_wifi(int argc, char **argv)
         return 1;
     }
     
-    ESP_LOGE(TAG, "Wifi SSID: '%s'", ssid);
-    ESP_LOGE(TAG, "Wifi PASS: '%s'", psk);
+    ESP_LOGI(TAG, "Wifi SSID: '%s'", ssid);
+    ESP_LOGI(TAG, "Wifi PASS: '%s'", psk);
 
     nvs_close(hdl_nvs);
     return 0;
@@ -64,7 +63,7 @@ static int read_wifi(int argc, char **argv)
 static int write_wifi(int argc, char **argv)
 {
     
-    ESP_LOGE(TAG, "write_wifi!!!");
+    ESP_LOGI(TAG, "write_wifi!!!");
 
     int nerrors = arg_parse(argc, argv, (void **) &write_wifi_args);
     if (nerrors != 0) {
@@ -93,9 +92,9 @@ static int write_wifi(int argc, char **argv)
         return 1;
     }
 
-    ESP_LOGE(TAG, "New Wifi SSID: '%s'", write_wifi_args.ssid->sval[0]);
-    ESP_LOGE(TAG, "New Wifi PASS: '%s'", write_wifi_args.password->sval[0]);
-    ESP_LOGE(TAG, "Restart your device to connect to Wi-Fi with the new credentials");
+    ESP_LOGI(TAG, "New Wifi SSID: '%s'", write_wifi_args.ssid->sval[0]);
+    ESP_LOGI(TAG, "New Wifi PASS: '%s'", write_wifi_args.password->sval[0]);
+    ESP_LOGW(TAG, "Restart your device to connect to Wi-Fi with the new credentials");
 
     nvs_close(hdl_nvs);
     return 0;
@@ -103,7 +102,7 @@ static int write_wifi(int argc, char **argv)
 
 static int read_was_url(int argc, char **argv)
 {
-    ESP_LOGE(TAG, "read_was_url!!!");
+    ESP_LOGI(TAG, "read_was_url!!!");
 
     esp_err_t err;
     nvs_handle_t hdl_nvs;
@@ -120,7 +119,7 @@ static int read_was_url(int argc, char **argv)
         return 1;
     }
    
-    ESP_LOGE(TAG, "WAS URL: '%s'", was_url);
+    ESP_LOGI(TAG, "WAS URL: '%s'", was_url);
 
     nvs_close(hdl_nvs);
     return 0;
@@ -129,7 +128,7 @@ static int read_was_url(int argc, char **argv)
 static int write_was_url(int argc, char **argv)
 {
     
-    ESP_LOGE(TAG, "write_was_url!!!");
+    ESP_LOGI(TAG, "write_was_url!!!");
 
     int nerrors = arg_parse(argc, argv, (void **) &write_was_url_args);
     if (nerrors != 0) {
@@ -151,14 +150,14 @@ static int write_was_url(int argc, char **argv)
         return 1;
     }
 
-    ESP_LOGE(TAG, "New WAS URL: '%s'", write_was_url_args.url->sval[0]);
-    ESP_LOGE(TAG, "Restart your device to connect with new WAS URL");
+    ESP_LOGI(TAG, "New WAS URL: '%s'", write_was_url_args.url->sval[0]);
+    ESP_LOGW(TAG, "Restart your device to connect with new WAS URL");
 
     nvs_close(hdl_nvs);
     return 0;
 }
 
-void register_commands(void)
+void register__willow_commands(void)
 {
     write_wifi_args.ssid = arg_str1(NULL, NULL, "<ssid>", "SSID of AP");
     write_wifi_args.password = arg_str1(NULL, NULL, "<pass>", "PSK of AP");

@@ -13,8 +13,8 @@ export DOCKER_NAME="willow-build"
 export DIST_FILE="build/${dist_filename:-willow-dist.bin}"
 
 # ESP-SR Componenent ver hash
-ESP_SR_VER="c8bf7cd118c437b4ab41ccb37e4ad6b84a8a4fc4"
-
+#ESP_SR_VER="c8bf7cd118c437b4ab41ccb37e4ad6b84a8a4fc4"
+ESP_SR_VER="34ee0895960729a842486e8bebfd2b52006c51fe"
 # esptool ver to install
 ESPTOOL_VER="4.5.1"
 

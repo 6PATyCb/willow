@@ -26,6 +26,7 @@ static const char *willow_hw_t[WILLOW_HW_MAX] = {
 
 i2c_bus_handle_t hdl_i2c_bus;
 volatile bool restarting = false;
+volatile bool sd_card_inited = false;
 
 const char *str_hw_type(int id)
 {
@@ -80,11 +81,24 @@ static void init_i2c(void)
     hdl_i2c_bus = i2c_bus_create(I2C_NUM_0, &i2c_cfg);
 }
 
+static void init_sdcard(void)
+{
+    //ESP_LOGE(TAG, "begin init_sdcard!!!");
+    int ret = ESP_OK;
+    ret = audio_board_sdcard_init(hdl_pset, SD_MODE_4_LINE);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "failed to init sdcard");
+        return;
+    }
+    sd_card_inited = true;
+}
+
 void init_system(void)
 {
  //   ESP_LOGW(TAG, "begin init_system!!!");
     set_hw_type();
     init_i2c();
+    init_sdcard();
     ESP_ERROR_CHECK(init_ev_loop());
     ESP_ERROR_CHECK(init_console());
 }

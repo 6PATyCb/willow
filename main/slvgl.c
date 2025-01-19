@@ -50,7 +50,7 @@ enum esp32_s3_box_touch_t {
 esp_lcd_panel_handle_t hdl_lcd = NULL;
 int lvgl_lock_timeout;
 lv_disp_t *ld;
-lv_obj_t *btn_cancel, *lbl_btn_cancel, *lbl_ln1, *lbl_ln2, *lbl_ln3, *lbl_ln4, *lbl_ln5;
+lv_obj_t *btn_cancel, *lbl_btn_cancel, *btn_player, *lbl_btn_player, *lbl_ln1, *lbl_ln2, *lbl_ln3, *lbl_ln4, *lbl_ln5, *lbl_clk;
 
 static periph_lcd_t *lcdp;
 
@@ -63,6 +63,7 @@ void cb_btn_cancel(lv_event_t *ev)
 
 void cb_scr(lv_event_t *ev)
 {
+   // ESP_LOGE(TAG, "begin cb_scr!!!!");
     // printf("cb_scr\n");
     switch (lv_event_get_code(ev)) {
         case LV_EVENT_RELEASED:
@@ -75,6 +76,7 @@ void cb_scr(lv_event_t *ev)
             break;
 
         default:
+           // ESP_LOGE(TAG, "begin cb_scr!!!! %d",lv_event_get_code(ev));
             break;
     }
 }

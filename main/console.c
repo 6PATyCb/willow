@@ -8,6 +8,7 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "cmd/cmd_willow.h"
+#include "cmd/cmd_player.h"
 
 /*
  * We warn if a secondary serial console is enabled. A secondary serial console is always output-only and
@@ -38,7 +39,8 @@ esp_err_t init_console(void) {
     /* Register commands */
     esp_console_register_help_command();
 
-    register_commands();
+    register__willow_commands();
+    register_player_commands();
 
     #if defined(CONFIG_ESP_CONSOLE_UART_DEFAULT) || defined(CONFIG_ESP_CONSOLE_UART_CUSTOM)
     esp_console_dev_uart_config_t hw_config = ESP_CONSOLE_DEV_UART_CONFIG_DEFAULT();

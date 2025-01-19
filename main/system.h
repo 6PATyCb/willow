@@ -24,6 +24,7 @@ extern esp_periph_set_handle_t hdl_pset;
 extern i2c_bus_handle_t hdl_i2c_bus;
 
 extern volatile bool restarting;
+extern volatile bool sd_card_inited;
 
 const char *str_hw_type(int id);
 void init_system(void);

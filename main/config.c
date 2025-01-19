@@ -19,6 +19,7 @@
 #include "system.h"
 #include "timer.h"
 #include "was.h"
+#include "ui.h"
 
 #define CONFIG_PATH "/spiffs/user/config/willow.json"
 
@@ -146,15 +147,16 @@ close:
     fclose(f);
 
     ESP_LOGI(TAG, "%s updated, restarting", CONFIG_PATH);
-    if (lvgl_port_lock(lvgl_lock_timeout)) {
-        lv_label_set_text_static(lbl_ln3, localize_text("Configuration Updated"));
-        lv_obj_add_flag(lbl_ln1, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(lbl_ln5, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(lbl_ln3, LV_OBJ_FLAG_HIDDEN);
-        lvgl_port_unlock();
-    }
+    show_center_text("Configuration Updated");
+    // if (lvgl_port_lock(lvgl_lock_timeout)) {
+    //     lv_label_set_text_static(lbl_ln3, localize_text("Configuration Updated"));
+    //     lv_obj_add_flag(lbl_ln1, LV_OBJ_FLAG_HIDDEN);
+    //     lv_obj_add_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
+    //     lv_obj_add_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
+    //     lv_obj_add_flag(lbl_ln5, LV_OBJ_FLAG_HIDDEN);
+    //     lv_obj_clear_flag(lbl_ln3, LV_OBJ_FLAG_HIDDEN);
+    //     lvgl_port_unlock();
+    // }
     reset_timer(hdl_display_timer, config_get_int("display_timeout", DEFAULT_DISPLAY_TIMEOUT), true);
     display_set_backlight(true, false);
     restart_delayed();

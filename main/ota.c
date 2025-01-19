@@ -8,7 +8,7 @@
 #include "esp_task_wdt.h"
 #include "esp_timer.h"
 #include "lvgl.h"
-
+#include "i18n.h"
 #include "audio.h"
 #include "config.h"
 #include "display.h"
@@ -19,6 +19,7 @@
 #include "system.h"
 #include "timer.h"
 #include "was.h"
+#include "ui.h"
 
 #define BUFSIZE 4096
 
@@ -153,20 +154,22 @@ void ota_task(void *data)
     }
 
     ESP_LOGI(TAG, "OTA completed, restarting");
-    if (lvgl_port_lock(lvgl_lock_timeout)) {
-        lv_label_set_text_static(lbl_ln3, "Обновление завершено");
-        lvgl_port_unlock();
-    }
+    show_center_text("Upgrade Done");
+    // if (lvgl_port_lock(lvgl_lock_timeout)) {
+    //     lv_label_set_text_static(lbl_ln3, localize_text("Upgrade Done"));
+    //     lvgl_port_unlock();
+    // }
     restart_delayed();
 err:
     esp_ota_abort(hdl_ota);
     esp_http_client_close(hdl_hc);
     esp_http_client_cleanup(hdl_hc);
     ESP_LOGI(TAG, "OTA failed, restarting");
-    if (lvgl_port_lock(lvgl_lock_timeout)) {
-        lv_label_set_text_static(lbl_ln3, "Обновление не удалось");
-        lvgl_port_unlock();
-    }
+    show_center_text("Upgrade Failed");
+    // if (lvgl_port_lock(lvgl_lock_timeout)) {
+    //     lv_label_set_text_static(lbl_ln3, localize_text("Upgrade Failed"));
+    //     lvgl_port_unlock();
+    // }
     restart_delayed();
     vTaskDelete(NULL);
 }
@@ -175,15 +178,16 @@ void ota_start(char *url)
 {
     ESP_LOGW(TAG, "begin ota_start!!!");
     reset_timer(hdl_display_timer, config_get_int("display_timeout", DEFAULT_DISPLAY_TIMEOUT), true);
-    if (lvgl_port_lock(lvgl_lock_timeout)) {
-        lv_obj_add_flag(lbl_ln1, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(lbl_ln5, LV_OBJ_FLAG_HIDDEN);
-        lv_label_set_text_static(lbl_ln3, "Начинаем обновление");
-        lv_obj_clear_flag(lbl_ln3, LV_OBJ_FLAG_HIDDEN);
-        lvgl_port_unlock();
-    }
+    show_center_text("Starting Upgrade");
+    // if (lvgl_port_lock(lvgl_lock_timeout)) {
+    //     lv_obj_add_flag(lbl_ln1, LV_OBJ_FLAG_HIDDEN);
+    //     lv_obj_add_flag(lbl_ln2, LV_OBJ_FLAG_HIDDEN);
+    //     lv_obj_add_flag(lbl_ln4, LV_OBJ_FLAG_HIDDEN);
+    //     lv_obj_add_flag(lbl_ln5, LV_OBJ_FLAG_HIDDEN);
+    //     lv_label_set_text_static(lbl_ln3, localize_text("Starting Upgrade"));
+    //     lv_obj_clear_flag(lbl_ln3, LV_OBJ_FLAG_HIDDEN);
+    //     lvgl_port_unlock();
+    // }
     display_set_backlight(true, false);
 
     deinit_audio();

@@ -13,6 +13,7 @@ void init_logging(void)
 #else
     esp_log_level_set("*", ESP_LOG_ERROR);
     esp_log_level_set("AUDIO_RECORDER", ESP_LOG_INFO);
+    esp_log_level_set("PLAYLIST_SDCARD", ESP_LOG_INFO);
 #endif
 
     esp_log_level_set("WILLOW/AUDIO", WILLOW_LOG_LEVEL);
@@ -32,4 +33,10 @@ void init_logging(void)
     esp_log_level_set("WILLOW/TIMER", WILLOW_LOG_LEVEL);
     esp_log_level_set("WILLOW/UI", WILLOW_LOG_LEVEL);
     esp_log_level_set("WILLOW/WAS", WILLOW_LOG_LEVEL);
+    esp_log_level_set("WILLOW/i18n", WILLOW_LOG_LEVEL);
+    esp_log_level_set("WILLOW/CONSOLE", WILLOW_LOG_LEVEL);
+    esp_log_level_set("WILLOW/CMD_WILLOW", WILLOW_LOG_LEVEL);
+    esp_log_level_set("WILLOW/CMD_PLAYER", WILLOW_LOG_LEVEL);
+    esp_log_level_set("WILLOW/PLAYER", WILLOW_LOG_LEVEL);
+    
 }

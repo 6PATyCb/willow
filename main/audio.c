@@ -19,6 +19,7 @@
 #include "lvgl.h"
 #include "model_path.h"
 #include "raw_stream.h"
+#include "fatfs_stream.h"
 #include "recorder_encoder.h"
 #include "recorder_sr.h"
 #include "sdkconfig.h"
@@ -34,6 +35,7 @@
 #include "timer.h"
 #include "ui.h"
 #include "was.h"
+#include "player.h"
 
 #include "endpoint/hass.h"
 #include "endpoint/openhab.h"
@@ -253,6 +255,12 @@ static void init_esp_audio(void)
         ESP_LOGE(TAG, "failed to add input stream to ESP Audio");
     }
 
+    fatfs_stream_cfg_t fs_reader = FATFS_STREAM_CFG_DEFAULT();
+    fs_reader.type = AUDIO_STREAM_READER;
+    esp_audio_input_stream_add(hdl_ea, fatfs_stream_init(&fs_reader));
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "failed to add fatfs stream to ESP Audio");
+    }
     // disable clang-format to allow each member on a new line
     // clang-format off
     audio_decoder_t ad[] = {
@@ -339,7 +347,10 @@ static esp_err_t cb_ar_event(audio_rec_evt_t *are, void *data)
 #if defined(WILLOW_SUPPORT_MULTINET)
     int command_id = 0;
 #endif
-
+    if (is_player_active() && !recording) {
+            ESP_LOGW(TAG, "cb_ar_event paused!!!");
+            return ESP_OK;
+    }
     switch (are->type) {
         case AUDIO_REC_VAD_END:
             ESP_LOGI(TAG, "AUDIO_REC_VAD_END");
@@ -954,6 +965,9 @@ static void at_read(void *data)
     TickType_t delay = portMAX_DELAY;
 
     while (true) {
+        if (is_player_active() && !recording) {
+            ESP_LOGW(TAG, "at_read paused!!!");
+        }
         if (xQueueReceive(q_rec, &msg, delay) == pdTRUE) {
             switch (msg) {
                 case MSG_START:
@@ -1115,6 +1129,7 @@ esp_err_t init_audio(void)
             lvgl_port_unlock();
         }
     }
+    player_init();
     return ret;
 }
 

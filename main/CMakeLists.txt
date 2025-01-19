@@ -21,6 +21,8 @@ set(COMPONENT_SRCS
     "i18n.c"
     "console.c"
     "cmd/cmd_willow.c"
+    "cmd/cmd_player.c"
+    "player.c"
 )
 set(COMPONENT_ADD_INCLUDEDIRS .)
 set(COMPONENT_PRIV_REQUIRES
@@ -37,6 +39,7 @@ set(COMPONENT_PRIV_REQUIRES
     input_key_service
     spiffs
     console
+    playlist
 )
 
 if(CONFIG_WILLOW_ETHERNET)
