@@ -22,6 +22,12 @@ config WILLOW_UI_LANG
     help
         Language for Willow UI. Supported EN, RU.
 
+config WILLOW_HA_DEVICE_ID
+    string "Home Assistant device_id"
+    default ""
+    help
+        Used to select a Home Assistant device that can be assigned to a zone, allowing voice commands to be used in the context of a zone (e.g. kitchen)
+
 config WILLOW_WAS_URL
     string "Willow Application Server URL"
     default "wss://was.local"

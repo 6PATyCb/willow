@@ -16,6 +16,7 @@
 #include "shared.h"
 #include "slvgl.h"
 #include "timer.h"
+#include "was.h"
 
 #define DEFAULT_HOST  "homeassistant.local"
 #define DEFAULT_PORT  8123
@@ -440,6 +441,7 @@ static void hass_send_ws(const char *data)
     cJSON *id = cJSON_CreateNumber(tv_now.tv_sec);
     cJSON *start_stage = cJSON_CreateStringReference("intent");
     cJSON *type = cJSON_CreateStringReference("assist_pipeline/run");
+    
 
     cJSON_AddItemToObjectCS(ws_data, "end_stage", end_stage);
     cJSON_AddItemToObjectCS(ws_data, "id", id);
@@ -447,6 +449,12 @@ static void hass_send_ws(const char *data)
     cJSON_AddItemToObjectCS(ws_data, "start_stage", start_stage);
     cJSON_AddItemToObjectCS(ws_data, "type", type);
 
+    if (ha_device_id[0] != '\0') {
+        cJSON *device_id = cJSON_CreateStringReference(ha_device_id);
+        cJSON_AddItemToObjectCS(ws_data, "device_id", device_id);
+    }
+    
+    
     char *string = cJSON_Print(ws_data);
 
     cJSON_free(end_stage);

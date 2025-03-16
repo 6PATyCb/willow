@@ -117,6 +117,7 @@ void app_main(void)
         ESP_LOGE(TAG, "failed to get SSID from NVS namespace WIFI: %s", esp_err_to_name(err));
         goto err_nvs;
     }
+    nvs_close(hdl_nvs);
     init_wifi(psk, ssid);
 #endif
 
@@ -129,6 +130,18 @@ void app_main(void)
     err = nvs_get_str(hdl_nvs, "URL", was_url, &sz);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "failed to get WAS URL from NVS namespace WAS: %s", esp_err_to_name(err));
+        goto err_nvs;
+    }
+    nvs_close(hdl_nvs);
+    err = nvs_open("HA", NVS_READONLY, &hdl_nvs);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "failed to open NVS namespace HA: %s", esp_err_to_name(err));
+        goto err_nvs;
+    }
+    sz = sizeof(ha_device_id);
+    err = nvs_get_str(hdl_nvs, "DEVICE_ID", ha_device_id, &sz);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "failed to get HA DEVICE_ID from NVS namespace HA: %s", esp_err_to_name(err));
         goto err_nvs;
     }
     state = STATE_NVS_OK;
