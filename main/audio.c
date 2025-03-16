@@ -725,10 +725,6 @@ static esp_err_t init_ap_to_api(void)
     return ESP_OK;
 }
 
-void my_handler(void *data) {
-    // Здесь можно обработать событие
-}
-
 static esp_err_t start_rec(void)
 {
    // ESP_LOGW(TAG, "begin start_rec!!!");
@@ -835,14 +831,7 @@ static esp_err_t start_rec(void)
 
     audio_pipeline_run(hdl_ap);
 
-    //---------------------------
-    // ESP_LOGE(TAG, "before esp_audio_input_stream_add mic!!!");
-    // ret = esp_audio_input_stream_add(hdl_ea, hdl_ae_is);
-    // if (ret != ESP_OK) {
-    //     ESP_LOGE(TAG, "failed to add mic input stream to ESP Audio");
-    // }
-    //---------------------------
-  //  ESP_LOGW(TAG, "before config_get_char!!!");
+ //   ESP_LOGW(TAG, "before config_get_char!!!");
     char *wake_mode = config_get_char("wake_mode", DEFAULT_WAKE_MODE);
     int wakenet_mode = -1;
     if (strcmp(wake_mode, "2CH_90") == 0) {
@@ -1176,45 +1165,6 @@ esp_err_t init_audio(void)
         }
     }
     return ret;
-}
-
-void test_mic_beg(void){
-    
-   // ESP_LOGE(TAG, "before mic audio_rec_evt_t!!!");
-    audio_recorder_trigger_start(hdl_ar);
-    // recorder_sr_wakeup_result_t *revt;
-    // revt = (recorder_sr_wakeup_result_t *)malloc(sizeof(recorder_sr_wakeup_result_t)); // Выделение памяти под структуру
-    // revt->data_volume = 100;
-    // revt->wake_word_index = 1;
-    // revt->wakenet_model_index = 1;
-
-    // audio_rec_evt_t evt;
-    // evt.type = AUDIO_REC_VAD_START;
-    // evt.event_data = revt; // Присвоение адреса структуры указателю event_data
-    // evt.data_len = sizeof(recorder_sr_wakeup_result_t); // Установка длины данных события
-
-    // ESP_LOGW(TAG, "before mic cb_ar_event my!!!");
-    // cb_ar_event(&evt,&my_handler);
-}
-
-void test_mic_end(void){
-    
-   // ESP_LOGE(TAG, "before mic audio_rec_evt_t!!!");
-    audio_recorder_trigger_stop(hdl_ar);
-    play_audio_err(NULL);
-    // recorder_sr_wakeup_result_t *revt;
-    // revt = (recorder_sr_wakeup_result_t *)malloc(sizeof(recorder_sr_wakeup_result_t)); // Выделение памяти под структуру
-    // revt->data_volume = 100;
-    // revt->wake_word_index = 1;
-    // revt->wakenet_model_index = 1;
-
-    // audio_rec_evt_t evt;
-    // evt.type = AUDIO_REC_VAD_END;
-    // evt.event_data = revt; // Присвоение адреса структуры указателю event_data
-    // evt.data_len = sizeof(recorder_sr_wakeup_result_t); // Установка длины данных события
-
-    // ESP_LOGW(TAG, "before mic cb_ar_event my!!!");
-    // cb_ar_event(&evt,&my_handler);
 }
 
 void deinit_audio(void)

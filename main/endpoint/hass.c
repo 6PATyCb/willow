@@ -383,7 +383,30 @@ static void hass_send_ws(const char *data)
         esp_websocket_client_destroy(hdl_wc);
         init_hass_ws_client();
     }
+    //ESP_LOGE(TAG, "!!!hass data= '%s'",data);
+    size_t len = strlen(data);
 
+    // Создаём новый массив для обрезанной строки
+    char *trimmed = NULL;
+
+    if (len >= 2 && data[0] == '"' && data[len - 1] == '"') {
+        len -= 2; // Уменьшаем длину на 2 символа (начальную и конечную кавычки)
+        trimmed = (char *)malloc(len + 1); // Выделяем память для новой строки (+1 для \0)
+        if (trimmed != NULL) {
+            strncpy(trimmed, data + 1, len); // Копируем подстроку без кавычек
+            trimmed[len] = '\0'; // Добавляем завершающий нулевой символ
+        }
+    } else {
+        // Если кавычек нет, копируем исходную строку
+        trimmed = strdup(data); // strdup создаёт копию строки
+    }
+
+    // Перезаписываем указатель
+    data = trimmed;
+
+    // Освобождаем память
+    //free(trimmed);
+    //ESP_LOGE(TAG, "!!!hass2 data= '%s'",data);
     cJSON *cjson = cJSON_Parse(data);
     cJSON *text = cJSON_GetObjectItemCaseSensitive(cjson, "text");
     cJSON *text_ = NULL;
@@ -393,7 +416,7 @@ static void hass_send_ws(const char *data)
         ESP_LOGE(TAG, "failed to create ws_input JSON object");
     }
 
-    if (cJSON_IsString(text) && text->valuestring != NULL) {
+    if (cJSON_IsString(text) && text->valuestring != NULL) {      
         cJSON_AddItemToObjectCS(ws_input, "text", text);
     } else {
         text_ = cJSON_CreateStringReference(data);
