@@ -144,6 +144,7 @@ void app_main(void)
         ESP_LOGE(TAG, "failed to get HA DEVICE_ID from NVS namespace HA: %s", esp_err_to_name(err));
         goto err_nvs;
     }
+    nvs_close(hdl_nvs);
     state = STATE_NVS_OK;
     err = init_was();
     if (err != ESP_OK) {
