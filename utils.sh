@@ -153,12 +153,18 @@ generate_nvs() {
     SSID=$(grep CONFIG_WIFI_SSID sdkconfig | cut -d'=' -f2 | tr -d '"')
     PASSWORD=$(grep CONFIG_WIFI_PASSWORD sdkconfig | cut -d'=' -f2 | tr -d '"')
     WAS_URL=$(grep CONFIG_WILLOW_WAS_URL sdkconfig | cut -d'=' -f2 | tr -d '"')
+    WILLOW_UI_LANG=$(grep CONFIG_WILLOW_UI_LANG sdkconfig | cut -d'=' -f2 | tr -d '"')
+    HA_DEVICE_ID=$(grep CONFIG_WILLOW_HA_DEVICE_ID sdkconfig | cut -d'=' -f2 | tr -d '"')
     echo -n "key,type,encoding,value
 WAS,namespace,,
 URL,data,string,$WAS_URL
 WIFI,namespace,,
 PSK,data,string,$PASSWORD
-SSID,data,string,$SSID" > build/nvs.csv
+SSID,data,string,$SSID
+HA,namespace,,
+DEVICE_ID,data,string,$HA_DEVICE_ID
+UI,namespace,,
+UI_LANG,data,string,$WILLOW_UI_LANG" > build/nvs.csv
     /opt/esp/idf/components/nvs_flash/nvs_partition_generator/nvs_partition_gen.py generate \
         --version 2 build/nvs.csv build/nvs.bin 0x24000
 }

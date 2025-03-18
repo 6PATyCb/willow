@@ -10,6 +10,8 @@ Updated esp-adf to 2.7
 
 Updated esp-idf to 5.2.3
 
+Added zone selection using [device_id](https://community.home-assistant.io/t/device-id-entity-id-where-to-find/289230) in Home Assistant. device_id can be set using console command.
+
 Added time indication
 
 Added simple MP3 Player from SD Card (FAT32 only 32GB MAX size). MP3 player starts working only after successfully connecting to WIFI and WAS. Click the music icon to start playing.

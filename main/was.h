@@ -1,4 +1,5 @@
 extern char was_url[2048];
+extern char ha_device_id[2048];
 
 void deinit_was(void);
 esp_err_t init_was(void);

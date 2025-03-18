@@ -16,6 +16,7 @@
 #include "shared.h"
 #include "slvgl.h"
 #include "timer.h"
+#include "was.h"
 
 #define DEFAULT_HOST  "homeassistant.local"
 #define DEFAULT_PORT  8123
@@ -383,7 +384,30 @@ static void hass_send_ws(const char *data)
         esp_websocket_client_destroy(hdl_wc);
         init_hass_ws_client();
     }
+    //ESP_LOGE(TAG, "!!!hass data= '%s'",data);
+    size_t len = strlen(data);
 
+    // Создаём новый массив для обрезанной строки
+    char *trimmed = NULL;
+
+    if (len >= 2 && data[0] == '"' && data[len - 1] == '"') {
+        len -= 2; // Уменьшаем длину на 2 символа (начальную и конечную кавычки)
+        trimmed = (char *)malloc(len + 1); // Выделяем память для новой строки (+1 для \0)
+        if (trimmed != NULL) {
+            strncpy(trimmed, data + 1, len); // Копируем подстроку без кавычек
+            trimmed[len] = '\0'; // Добавляем завершающий нулевой символ
+        }
+    } else {
+        // Если кавычек нет, копируем исходную строку
+        trimmed = strdup(data); // strdup создаёт копию строки
+    }
+
+    // Перезаписываем указатель
+    data = trimmed;
+
+    // Освобождаем память
+    //free(trimmed);
+    //ESP_LOGE(TAG, "!!!hass2 data= '%s'",data);
     cJSON *cjson = cJSON_Parse(data);
     cJSON *text = cJSON_GetObjectItemCaseSensitive(cjson, "text");
     cJSON *text_ = NULL;
@@ -418,12 +442,19 @@ static void hass_send_ws(const char *data)
     cJSON *start_stage = cJSON_CreateStringReference("intent");
     cJSON *type = cJSON_CreateStringReference("assist_pipeline/run");
 
+
     cJSON_AddItemToObjectCS(ws_data, "end_stage", end_stage);
     cJSON_AddItemToObjectCS(ws_data, "id", id);
     cJSON_AddItemToObjectCS(ws_data, "input", ws_input);
     cJSON_AddItemToObjectCS(ws_data, "start_stage", start_stage);
     cJSON_AddItemToObjectCS(ws_data, "type", type);
 
+    if (ha_device_id[0] != '\0') {
+        cJSON *device_id = cJSON_CreateStringReference(ha_device_id);
+        cJSON_AddItemToObjectCS(ws_data, "device_id", device_id);
+    }
+    
+    
     char *string = cJSON_Print(ws_data);
 
     cJSON_free(end_stage);
